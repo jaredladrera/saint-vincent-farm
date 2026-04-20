@@ -14,10 +14,12 @@ $user = currentUser();
            class="<?= $current_page == 'home'     ? 'active-nav' : '' ?>">Home</a>
         <a href="index.php?page=shop"
            class="<?= $current_page == 'shop'     ? 'active-nav' : '' ?>">Products</a>
-        <a href="index.php?page=features"
-           class="<?= $current_page == 'features' ? 'active-nav' : '' ?>">System Features</a>
+        <!-- <a href="index.php?page=features"
+           class="<?= $current_page == 'features' ? 'active-nav' : '' ?>">System Features</a> -->
         <a href="index.php?page=about"
            class="<?= $current_page == 'about'    ? 'active-nav' : '' ?>">About</a>
+        <a href="index.php?page=contact"
+           class="<?= $current_page == 'contact'     ? 'active-nav' : '' ?>">Contact Us</a>
 
         <?php if ($user): ?>
             <!-- Logged-in: show Order Now + user dropdown -->
@@ -51,10 +53,6 @@ $user = currentUser();
             <!-- Guest: show Sign In -->
             <a href="index.php?page=login" class="nav-signin">
                 <i class="bi bi-person"></i> Sign In
-            </a>
-            <a href="index.php?page=contact"
-               class="nav-cta <?= $current_page == 'contact' ? 'active-nav' : '' ?>">
-                Order Now
             </a>
         <?php endif; ?>
     </div>

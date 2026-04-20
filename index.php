@@ -18,10 +18,10 @@ if ($page === 'logout') {
 $allowed_pages = ['home', 'shop', 'features', 'about', 'contact', 'login', 'register'];
 if (!in_array($page, $allowed_pages)) $page = 'home';
 
-if ($page === 'contact' && !isLoggedIn()) {
-    header('Location: ' . BASE_URL . '/index.php?page=login&redirect=contact');
-    exit;
-}
+// if ($page === 'contact' && !isLoggedIn()) {
+//     header('Location: ' . BASE_URL . '/index.php?page=login&redirect=contact');
+//     exit;
+// }
 if (in_array($page, ['login', 'register']) && isLoggedIn()) {
     $redirect = $_GET['redirect'] ?? 'home';
     header('Location: ' . BASE_URL . '/index.php?page=' . urlencode($redirect));

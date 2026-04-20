@@ -3,7 +3,7 @@
 
 class Connect{
     
-    public $host = "localhost";
+    public $host = "127.0.0.1";
     public $user = "root";
     public $password = "";
     public $dbname = "saint_vincent_farm";
@@ -28,7 +28,7 @@ class Connect{
 $connection = new Connect();
 
 
-$stm = $connection->query("SELECT * FROM user_profile");
+$stm = $connection->connection->query("SELECT * FROM user_profile");
 
 
 while($row = $stm->fetch(PDO::FETCH_ASSOC)) :

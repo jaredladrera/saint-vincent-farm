@@ -28,7 +28,7 @@ $user = currentUser();
                 Order Now
             </a>
             <div class="user-menu-wrap">
-                <button class="user-avatar-btn" onclick="toggleUserMenu()">
+                <button class="user-avatar-btn" onclick="toggleUserMenu(event)">
                     <span class="user-avatar"><?= htmlspecialchars($user['avatar']) ?></span>
                     <span class="user-name"><?= htmlspecialchars(explode(' ', $user['name'])[0]) ?></span>
                     <i class="bi bi-chevron-down user-caret"></i>
@@ -44,9 +44,11 @@ $user = currentUser();
                     <a href="index.php?page=contact" class="user-dropdown-item">
                         <i class="bi bi-bag"></i> My Orders
                     </a>
-                    <a href="index.php?page=logout" class="user-dropdown-item logout-item">
+                <a href="#"
+                    class="user-dropdown-item logout-item"
+                    onclick="event.stopPropagation(); window.location.href='index.php?page=logout'; return false;">
                         <i class="bi bi-box-arrow-right"></i> Sign Out
-                    </a>
+                </a>
                 </div>
             </div>
         <?php else: ?>

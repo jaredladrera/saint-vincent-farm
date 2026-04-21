@@ -7,6 +7,7 @@ define('BASE_URL', rtrim(dirname($_SERVER['SCRIPT_NAME']), '/\\'));
 
 $page = $_GET['page'] ?? 'home';
 
+
 // ── Logout must be FIRST before any output ──
 if (($_GET['page'] ?? '') === 'logout') {
     session_start();
@@ -16,9 +17,9 @@ if (($_GET['page'] ?? '') === 'logout') {
     exit;
 }
 
-require_once BASE_DIR . '/includes/auth.php'; // load after logout check
+require_once BASE_DIR . '/includes/auth.php';
 
-$allowed_pages = ['home', 'shop', 'features', 'about', 'contact', 'login', 'register'];
+$allowed_pages = ['home', 'shop', 'features', 'about', 'contact', 'login', 'register', 'logout  '];
 if (!in_array($page, $allowed_pages)) $page = 'home';
 
 // if ($page === 'contact' && !isLoggedIn()) {

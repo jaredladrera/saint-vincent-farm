@@ -1,7 +1,14 @@
 <?php
+
+require "./shared/crud.php";
 // ══════════════════════════════════
 // REGISTER PAGE — pages/register.php
 // ══════════════════════════════════
+
+
+// Import PDO connection
+require_once "./config/pdo_connection.php";
+require_once "./shared/helpers.php";
 
 $redirect = $_GET['redirect'] ?? 'contact';
 $error    = '';
@@ -9,47 +16,88 @@ $success  = false;
 
 // ── Handle registration form POST ──
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    $full_name = trim($_POST['full_name'] ?? '');
-    $email     = trim($_POST['email']     ?? '');
-    $phone     = trim($_POST['phone']     ?? '');
-    $password  = $_POST['password']  ?? '';
-    $confirm   = $_POST['confirm_pw'] ?? '';
+    $first_name     = trim($_POST['first_name']     ?? '');
+    $middle_name    = trim($_POST['middle_name']    ?? '');
+    $last_name      = trim($_POST['last_name']      ?? '');
+    $contact_number = trim($_POST['contact_number'] ?? '');
+    $email_address  = trim($_POST['email_address']  ?? '');
+    $purok          = trim($_POST['purok']          ?? '');
+    $barangay       = trim($_POST['barangay']       ?? '');
+    $citymun        = trim($_POST['citymun']        ?? '');
+    $province       = trim($_POST['province']       ?? '');
+    $password       = $_POST['password']   ?? '';
+    $confirm        = $_POST['confirm_pw'] ?? '';
 
     // Validation
-    if (!$full_name || !$email || !$password || !$confirm) {
+    if (!$first_name || !$last_name || !$email_address || !$password || !$confirm) {
         $error = 'Please fill in all required fields.';
-    } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+    } elseif (!filter_var($email_address, FILTER_VALIDATE_EMAIL)) {
         $error = 'Please enter a valid email address.';
     } elseif (strlen($password) < 6) {
         $error = 'Password must be at least 6 characters.';
     } elseif ($password !== $confirm) {
         $error = 'Passwords do not match.';
     } else {
-        // ── In production: INSERT into users table ──
-        // $hashed = password_hash($password, PASSWORD_DEFAULT);
-        // $stmt = $pdo->prepare("INSERT INTO users (name, email, phone, password) VALUES (?, ?, ?, ?)");
-        // $stmt->execute([$full_name, $email, $phone, $hashed]);
+        try {
+            $db  = new Connect();
+            $pdo = $db->connection;
 
-        // For demo: auto-login after register
-        $initials = '';
-        $parts = explode(' ', $full_name);
-        foreach ($parts as $part) {
-            $initials .= strtoupper(substr($part, 0, 1));
+            // Check if email already exists
+            $checkStmt = $pdo->prepare("SELECT id FROM user_profile WHERE email_address = :email");
+            $checkStmt->execute([':email' => $email_address]);
+
+            if ($checkStmt->fetch()) {
+                $error = 'An account with that email address already exists.';
+            } else {
+                $hashed = password_hash($password, PASSWORD_DEFAULT);
+
+                $stmt = $pdo->prepare("
+                    INSERT INTO user_profile
+                        (first_name, middle_name, last_name, contact_number, email_address,
+                         purok, barangay, citymun, province, user_role, date_created, password)
+                    VALUES
+                        (:first_name, :middle_name, :last_name, :contact_number, :email_address,
+                         :purok, :barangay, :citymun, :province, 'user', CURDATE(), :password)
+                ");
+
+                $stmt->execute([
+                    ':first_name'     => $first_name,
+                    ':middle_name'    => $middle_name,
+                    ':last_name'      => $last_name,
+                    ':contact_number' => $contact_number,
+                    ':email_address'  => $email_address,
+                    ':purok'          => $purok,
+                    ':barangay'       => $barangay,
+                    ':citymun'        => $citymun,
+                    ':province'       => $province,
+                    ':password'       => $hashed,
+                ]);
+
+                $new_id   = $pdo->lastInsertId();
+                $initials = strtoupper(substr($first_name, 0, 1) . substr($last_name, 0, 1));
+
+                $_SESSION['user'] = [
+                    'id'     => $new_id,
+                    'name'   => $first_name . ' ' . $last_name,
+                    'email'  => $email_address,
+                    'avatar' => $initials,
+                    'role'   => 'user',
+                ];
+
+
+                // Redirect based on role
+                redirectByRole($_SESSION['user']['role'], $redirect);
+                // header('Location: index.php?page=' . urlencode($redirect) . '&registered=1');
+                exit;
+            }
+
+        } catch (PDOException $e) {
+            $error = 'Registration failed. Please try again. (' . $e->getMessage() . ')';
         }
-        $initials = substr($initials, 0, 2);
-
-        $_SESSION['user'] = [
-            'id'     => rand(100, 999), // demo ID (use real DB id in production)
-            'name'   => $full_name,
-            'email'  => $email,
-            'avatar' => $initials,
-        ];
-
-        // Redirect to intended page
-        header('Location: index.php?page=' . urlencode($redirect) . '&registered=1');
-        exit;
     }
 }
+
+
 ?>
 
 <div class="auth-page">
@@ -83,45 +131,114 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 </div>
 
                 <?php if ($error): ?>
-                <div class="auth-alert auth-alert-error">
-                    <i class="bi bi-exclamation-circle"></i> <?= htmlspecialchars($error) ?>
-                </div>
+                    <div class="auth-alert auth-alert-error">
+                        <i class="bi bi-exclamation-circle"></i> <?= htmlspecialchars($error) ?>
+                    </div>
                 <?php endif; ?>
 
                 <form method="POST" action="index.php?page=register&redirect=<?= urlencode($redirect) ?>">
 
-                    <div class="auth-field">
-                        <label class="auth-label">Full Name <span class="req">*</span></label>
-                        <div class="auth-input-wrap">
-                            <i class="bi bi-person"></i>
-                            <input type="text" name="full_name" class="auth-input"
-                                   placeholder="Juan dela Cruz"
-                                   value="<?= htmlspecialchars($_POST['full_name'] ?? '') ?>"
-                                   required autofocus />
+                    <!-- ── Name Fields ── -->
+                    <div class="auth-row">
+                        <div class="auth-field">
+                            <label class="auth-label">First Name <span class="req">*</span></label>
+                            <div class="auth-input-wrap">
+                                <i class="bi bi-person"></i>
+                                <input type="text" name="first_name" class="auth-input"
+                                       placeholder="Juan"
+                                       value="<?= htmlspecialchars($_POST['first_name'] ?? '') ?>"
+                                       required autofocus />
+                            </div>
+                        </div>
+                        <div class="auth-field">
+                            <label class="auth-label">Middle Name</label>
+                            <div class="auth-input-wrap">
+                                <i class="bi bi-person"></i>
+                                <input type="text" name="middle_name" class="auth-input"
+                                       placeholder="Santos"
+                                       value="<?= htmlspecialchars($_POST['middle_name'] ?? '') ?>" />
+                            </div>
                         </div>
                     </div>
 
                     <div class="auth-field">
-                        <label class="auth-label">Email Address <span class="req">*</span></label>
+                        <label class="auth-label">Last Name <span class="req">*</span></label>
                         <div class="auth-input-wrap">
-                            <i class="bi bi-envelope"></i>
-                            <input type="email" name="email" class="auth-input"
-                                   placeholder="juan@email.com"
-                                   value="<?= htmlspecialchars($_POST['email'] ?? '') ?>"
+                            <i class="bi bi-person-fill"></i>
+                            <input type="text" name="last_name" class="auth-input"
+                                   placeholder="dela Cruz"
+                                   value="<?= htmlspecialchars($_POST['last_name'] ?? '') ?>"
                                    required />
                         </div>
                     </div>
 
-                    <div class="auth-field">
-                        <label class="auth-label">Phone Number</label>
-                        <div class="auth-input-wrap">
-                            <i class="bi bi-telephone"></i>
-                            <input type="tel" name="phone" class="auth-input"
-                                   placeholder="09XX XXX XXXX"
-                                   value="<?= htmlspecialchars($_POST['phone'] ?? '') ?>" />
+                    <!-- ── Contact & Email ── -->
+                    <div class="auth-row">
+                        <div class="auth-field">
+                            <label class="auth-label">Contact Number</label>
+                            <div class="auth-input-wrap">
+                                <i class="bi bi-telephone"></i>
+                                <input type="tel" name="contact_number" class="auth-input"
+                                       placeholder="09XX XXX XXXX"
+                                       value="<?= htmlspecialchars($_POST['contact_number'] ?? '') ?>" />
+                            </div>
+                        </div>
+                        <div class="auth-field">
+                            <label class="auth-label">Email Address <span class="req">*</span></label>
+                            <div class="auth-input-wrap">
+                                <i class="bi bi-envelope"></i>
+                                <input type="email" name="email_address" class="auth-input"
+                                       placeholder="juan@email.com"
+                                       value="<?= htmlspecialchars($_POST['email_address'] ?? '') ?>"
+                                       required />
+                            </div>
                         </div>
                     </div>
 
+                    <!-- ── Address Fields ── -->
+                    <div class="auth-row">
+                        <div class="auth-field">
+                            <label class="auth-label">Purok</label>
+                            <div class="auth-input-wrap">
+                                <i class="bi bi-geo"></i>
+                                <input type="text" name="purok" class="auth-input"
+                                       placeholder="Purok 1"
+                                       value="<?= htmlspecialchars($_POST['purok'] ?? '') ?>" />
+                            </div>
+                        </div>
+                        <div class="auth-field">
+                            <label class="auth-label">Barangay</label>
+                            <div class="auth-input-wrap">
+                                <i class="bi bi-geo"></i>
+                                <input type="text" name="barangay" class="auth-input"
+                                       placeholder="Barangay"
+                                       value="<?= htmlspecialchars($_POST['barangay'] ?? '') ?>" />
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="auth-row">
+                        <div class="auth-field">
+                            <label class="auth-label">City / Municipality</label>
+                            <div class="auth-input-wrap">
+                                <i class="bi bi-building"></i>
+                                <input type="text" name="citymun" class="auth-input"
+                                       placeholder="City or Municipality"
+                                       value="<?= htmlspecialchars($_POST['citymun'] ?? '') ?>" />
+                            </div>
+                        </div>
+                        <div class="auth-field">
+                            <label class="auth-label">Province</label>
+                            <div class="auth-input-wrap">
+                                <i class="bi bi-map"></i>
+                                <input type="text" name="province" class="auth-input"
+                                       placeholder="Province"
+                                       value="<?= htmlspecialchars($_POST['province'] ?? '') ?>" />
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- ── Password ── -->
                     <div class="auth-row">
                         <div class="auth-field">
                             <label class="auth-label">Password <span class="req">*</span></label>
@@ -180,7 +297,21 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     </div>
 </div>
 
+
+<!-- <div class="sample">
+    <input type="text" class="form-control" id="test">
+    <button class="btn btn-primary" onclick="sampleAjax()">Test ajax</button>
+</div> -->
+
 <script>
+
+// sampleAjax = () => {
+//     test = $('#test').val();
+
+//     alert(`test ${test}`);
+// }
+
+
 // Password strength meter
 document.getElementById('regPassword').addEventListener('input', function() {
     const val  = this.value;
@@ -208,4 +339,7 @@ document.getElementById('regPassword').addEventListener('input', function() {
     lbl.textContent       = lvl.label;
     lbl.style.color       = lvl.color;
 });
+
+
+
 </script>

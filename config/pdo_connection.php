@@ -16,26 +16,24 @@ class Connect{
         //default is fetch object
         $this->connection->setAttribute(PDO::ATTR_DEFAULT_FETCH_MODE, PDO::FETCH_OBJ);
 		if (!$this->connection) {
-			echo "Not Connected";
-		} else {
-            echo "Connected";
-        }
+			echo "Not Connected To The Database";
+		}
 	}
 
 
 };
 
-$connection = new Connect();
+// $connection = new Connect();
 
 
-$stm = $connection->connection->query("SELECT * FROM user_profile");
+// $stm = $connection->connection->query("SELECT * FROM user_profile");
 
 
-while($row = $stm->fetch(PDO::FETCH_ASSOC)) :
+// while($row = $stm->fetch(PDO::FETCH_ASSOC)) :
 
-    echo $row['first_name'];
+//     echo $row['first_name'];
 
-endwhile;
+// endwhile;
 
 // while($row = $stm->fetch(PDO::FETCH_OBJ)) :
 

@@ -5,15 +5,18 @@
 define('BASE_DIR', __DIR__);
 define('BASE_URL', rtrim(dirname($_SERVER['SCRIPT_NAME']), '/\\'));
 
-require_once BASE_DIR . '/includes/auth.php';
-
 $page = $_GET['page'] ?? 'home';
 
-if ($page === 'logout') {
-    logout();
-    header('Location: ' . BASE_URL . '/index.php?page=home&logged_out=1');
+// ── Logout must be FIRST before any output ──
+if (($_GET['page'] ?? '') === 'logout') {
+    session_start();
+    session_unset();
+    session_destroy();
+    header('Location: ' . BASE_URL . '/index.php?page=home');
     exit;
 }
+
+require_once BASE_DIR . '/includes/auth.php'; // load after logout check
 
 $allowed_pages = ['home', 'shop', 'features', 'about', 'contact', 'login', 'register'];
 if (!in_array($page, $allowed_pages)) $page = 'home';
@@ -59,7 +62,9 @@ $auth_pages = ['login', 'register'];
 <?php
     if      ($page == 'home')     { require BASE_DIR . '/pages/home.php'; }
     elseif  ($page == 'shop')     { require BASE_DIR . '/pages/shop.php'; }
-    elseif  ($page == 'features') { require BASE_DIR . '/pages/features.php'; }
+    elseif  ($page == 'features') { 
+        echo "feature";    
+    require BASE_DIR . '/pages/features.php'; }
     elseif  ($page == 'about')    { require BASE_DIR . '/pages/about.php'; }
     elseif  ($page == 'contact')  { require BASE_DIR . '/pages/contact.php'; }
     elseif  ($page == 'login')    { require BASE_DIR . '/pages/login.php'; }

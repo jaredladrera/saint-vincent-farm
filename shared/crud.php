@@ -1,5 +1,5 @@
 <?php
- include './../config/pdo_connection.php';
+ include './config/pdo_connection.php';
 
  class DataOperation extends Connect{
 

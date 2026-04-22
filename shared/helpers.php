@@ -1,18 +1,17 @@
 <?php 
-// ── Role-based redirect helper ──
 function redirectByRole($role, $fallback = 'contact') {
+    $base = rtrim(dirname($_SERVER['SCRIPT_NAME']), '/\\');
     switch ($role) {
         case 'admin':
-            header('Location: index.php?page=account/admin');
+            header('Location: ' . $base . '/accounts/admin/index.php');
             break;
         case 'staff':
-            header('Location: index.php?page=account/staff'); // adjust as needed
+            header('Location: ' . $base . '/accounts/staff/index.php');
             break;
-        default: // 'user', 'customer', etc.
-            header('Location: index.php?page=' . urlencode($fallback) . '&registered=1');
+        default:
+            header('Location: ' . $base . '/index.php?page=' . urlencode($fallback));
             break;
     }
     exit;
 }
-
 ?>

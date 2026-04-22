@@ -9,9 +9,9 @@ $current = $_GET['page'] ?? 'dashboard';
     <!-- Brand -->
     <div class="sidebar-brand">
         <div class="brand-icon">
-            <i class="bi bi-grid-3x3-gap-fill"></i>
+            <i class="bi bi-clipboard-data"></i>
         </div>
-        <span class="brand-name">AdminKit</span>
+        <span class="brand-name">Saint Vincent Farm</span>
     </div>
 
     <!-- Nav -->
@@ -32,6 +32,22 @@ $current = $_GET['page'] ?? 'dashboard';
                    class="nav-link <?= $current === 'products' ? 'active' : '' ?>">
                     <i class="bi bi-box-seam"></i>
                     <span>Products</span>
+                </a>
+            </li>
+
+            <li class="nav-item">
+                <a href="<?= BASE_URL ?>/index.php?page=orders"
+                   class="nav-link <?= $current === 'orders' ? 'active' : '' ?>">
+                    <i class="bi bi-bag"></i>
+                    <span>Orders</span>
+                </a>
+            </li>
+
+            <li class="nav-item">
+                <a href="<?= BASE_URL ?>/index.php?page=users"
+                   class="nav-link <?= $current === 'users' ? 'active' : '' ?>">
+                    <i class="bi bi-people-fill"></i>
+                    <span>Users</span>
                 </a>
             </li>
 

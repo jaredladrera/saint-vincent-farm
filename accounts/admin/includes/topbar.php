@@ -3,6 +3,7 @@ $current = $_GET['page'] ?? 'dashboard';
 $titles = [
     'dashboard' => 'Dashboard',
     'products'  => 'Products',
+    'users'  => 'Users',
     'profile'   => 'Profile',
 ];
 $page_title = $titles[$current] ?? 'Admin';

@@ -9,3 +9,6 @@
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@400;500;600;700&family=Syne:wght@600;700;800&display=swap" rel="stylesheet" />
 <!-- Custom CSS -->
 <link rel="stylesheet" href="<?= BASE_URL ?>/assets/admin.css" />
+
+<!-- jQuery (must come first) -->
+<script src="https://cdn.jsdelivr.net/npm/jquery@3.7.1/dist/jquery.min.js"></script>

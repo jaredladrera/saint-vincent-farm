@@ -57,9 +57,13 @@
     });
 
     // ── Tooltip init (Bootstrap) ────
-    const tooltipEls = document.querySelectorAll('[title]');
-    tooltipEls.forEach(function (el) {
-        new bootstrap.Tooltip(el, { trigger: 'hover' });
-    });
-
+    if (typeof bootstrap !== 'undefined') {
+        document.querySelectorAll('[title]').forEach(function (el) {
+            try {
+                new bootstrap.Tooltip(el, { trigger: 'hover' });
+            } catch (e) {
+                console.warn('Tooltip init failed on:', el, e);
+            }
+        });
+    }
 })();

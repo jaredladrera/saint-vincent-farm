@@ -23,10 +23,6 @@ $user = currentUser();
 
         <?php if ($user): ?>
             <!-- Logged-in: show Order Now + user dropdown -->
-            <a href="index.php?page=contact"
-               class="nav-cta <?= $current_page == 'contact' ? 'active-nav' : '' ?>">
-                Order Now
-            </a>
             <div class="user-menu-wrap">
                 <button class="user-avatar-btn" onclick="toggleUserMenu()">
                     <span class="user-avatar"><?= htmlspecialchars($user['avatar']) ?></span>
@@ -41,7 +37,7 @@ $user = currentUser();
                             <span><?= htmlspecialchars($user['email']) ?></span>
                         </div>
                     </div>
-                    <a href="index.php?page=contact" class="user-dropdown-item">
+                    <a href="index.php?page=contact" class="user-dropdown-item text-black">
                         <i class="bi bi-bag"></i> My Orders
                     </a>
                     <a href="index.php?page=logout" class="user-dropdown-item logout-item">
@@ -100,4 +96,4 @@ $user = currentUser();
 </div>
 
 <!-- User dropdown backdrop -->
-<div class="user-backdrop" id="userBackdrop" onclick="toggleUserMenu()"></div>
+<!-- <div class="user-backdrop" id="userBackdrop" onclick="toggleUserMenu()"></div> -->

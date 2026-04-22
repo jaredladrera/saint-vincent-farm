@@ -19,7 +19,12 @@ if (($_GET['page'] ?? '') === 'logout') {
 
 require_once BASE_DIR . '/includes/auth.php';
 
-$allowed_pages = ['home', 'shop', 'features', 'about', 'contact', 'login', 'register', 'logout  '];
+$allowed_pages = [
+    'home', 'shop', 'features', 'about', 'contact', 
+    'login', 'register',
+    'account/admin',  // ← add this
+    'account/staff',  // ← add this
+];
 if (!in_array($page, $allowed_pages)) $page = 'home';
 
 // if ($page === 'contact' && !isLoggedIn()) {

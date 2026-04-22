@@ -3,57 +3,63 @@
 // LOGIN PAGE — pages/login.php
 // ══════════════════════════════════
 
-// Where to go after login (default: contact/order page)
+require_once BASE_DIR . '/config/pdo_connection.php';
+require_once BASE_DIR . '/shared/helpers.php';
+
+
+function redirectRole($role, $fallback = 'contact') {
+    $base = rtrim(dirname($_SERVER['SCRIPT_NAME']), '/\\');
+        redirectByRole($role);
+    exit;
+}
+
 $redirect = $_GET['redirect'] ?? 'contact';
+$error    = '';
 
 // ── Handle login form POST ──
-$error = '';
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $email    = trim($_POST['email']    ?? '');
     $password = $_POST['password'] ?? '';
-
-    // ── Demo credential check ──
-    // In production: query DB and use password_verify()
-    // Example: SELECT * FROM users WHERE email = ? then password_verify($password, $row['password'])
-
-    // Simulated registered users (replace with real DB query)
-    $demo_users = [
-        [
-            'id'       => 1,
-            'name'     => 'Juan dela Cruz',
-            'email'    => 'juan@email.com',
-            'password' => password_hash('password123', PASSWORD_DEFAULT), // hashed
-            'avatar'   => 'JD',
-        ],
-    ];
-
-    $found = null;
-    foreach ($demo_users as $u) {
-        if ($u['email'] === $email && password_verify($password, $u['password'])) {
-            $found = $u;
-            break;
-        }
-    }
 
     if (!$email || !$password) {
         $error = 'Please fill in all fields.';
     } elseif (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
         $error = 'Please enter a valid email address.';
-    } elseif (!$found) {
-        $error = 'Incorrect email or password. Please try again.';
     } else {
-        // ── Set session ──
-        $_SESSION['user'] = [
-            'id'     => $found['id'],
-            'name'   => $found['name'],
-            'email'  => $found['email'],
-            'avatar' => $found['avatar'],
-        ];
-        // Redirect to intended page
-        header('Location: index.php?page=' . urlencode($redirect));
-        exit;
+        try {
+            $db  = new Connect();
+            $pdo = $db->connection;
+
+            $stmt = $pdo->prepare("
+                SELECT * FROM user_profile WHERE email_address = :email LIMIT 1
+            ");
+            $stmt->execute([':email' => $email]);
+            $user = $stmt->fetch(); // returns object (FETCH_OBJ is default)
+
+            if (!$user || $user->password !== $password)  {
+                $error = 'Incorrect email or password. Please try again.';
+            } else {
+                $initials = strtoupper(
+                    substr($user->first_name, 0, 1) . substr($user->last_name, 0, 1)
+                );
+
+                $_SESSION['user'] = [
+                    'id'     => $user->id,
+                    'name'   => $user->first_name . ' ' . $user->last_name,
+                    'email'  => $user->email_address,
+                    'avatar' => $initials,
+                    'role'   => $user->user_role,
+                ];
+                // ── Redirect based on role ──
+                redirectByRole($user->user_role, $redirect);
+            }
+
+        } catch (PDOException $e) {
+            $error = 'Login failed. Please try again. (' . $e->getMessage() . ')';
+        }
     }
 }
+
 ?>
 
 <div class="auth-page">

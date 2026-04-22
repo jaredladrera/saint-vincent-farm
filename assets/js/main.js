@@ -201,12 +201,15 @@ function toggleUserMenu() {
     const btn      = document.querySelector('.user-avatar-btn');
     const dropdown = document.getElementById('userDropdown');
     const backdrop = document.getElementById('userBackdrop');
+
     if (!dropdown) return;
+
     const isOpen = dropdown.classList.contains('open');
     dropdown.classList.toggle('open', !isOpen);
-    backdrop.classList.toggle('open', !isOpen);
-    if (btn) btn.classList.toggle('open', !isOpen);
+    // backdrop.classList.toggle('open', !isOpen);
+    // if (btn) btn.classList.toggle('open', !isOpen);
 }
+
 
 // Close user menu on Escape
 document.addEventListener('keydown', function(e) {

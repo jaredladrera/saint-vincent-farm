@@ -9,13 +9,24 @@ require_once BASE_DIR . '/includes/auth.php';
 
 $page = $_GET['page'] ?? 'home';
 
-if ($page === 'logout') {
-    logout();
-    header('Location: ' . BASE_URL . '/index.php?page=home&logged_out=1');
+
+// ── Logout must be FIRST before any output ──
+if (($_GET['page'] ?? '') === 'logout') {
+    session_start();
+    session_unset();
+    session_destroy();
+    header('Location: ' . BASE_URL . '/index.php?page=home');
     exit;
 }
 
-$allowed_pages = ['home', 'shop', 'features', 'about', 'contact', 'login', 'register'];
+require_once BASE_DIR . '/includes/auth.php';
+
+$allowed_pages = [
+    'home', 'shop', 'features', 'about', 'contact', 
+    'login', 'register',
+    'account/admin',  // ← add this
+    'account/staff',  // ← add this
+];
 if (!in_array($page, $allowed_pages)) $page = 'home';
 
 // if ($page === 'contact' && !isLoggedIn()) {

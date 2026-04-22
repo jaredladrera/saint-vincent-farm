@@ -70,7 +70,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     ':barangay'       => $barangay,
                     ':citymun'        => $citymun,
                     ':province'       => $province,
-                    ':password'       => $hashed,
+                    ':password'       => $password,
                 ]);
 
                 $new_id   = $pdo->lastInsertId();

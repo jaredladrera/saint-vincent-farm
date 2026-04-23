@@ -21,10 +21,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $last_name      = trim($_POST['last_name']      ?? '');
     $contact_number = trim($_POST['contact_number'] ?? '');
     $email_address  = trim($_POST['email_address']  ?? '');
-    $purok          = trim($_POST['purok']          ?? '');
-    $barangay       = trim($_POST['barangay']       ?? '');
-    $citymun        = trim($_POST['citymun']        ?? '');
-    $province       = trim($_POST['province']       ?? '');
+    $address        = trim($_POST['address']        ?? '');
     $password       = $_POST['password']   ?? '';
     $confirm        = $_POST['confirm_pw'] ?? '';
 
@@ -54,10 +51,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $stmt = $pdo->prepare("
                     INSERT INTO user_profile
                         (first_name, middle_name, last_name, contact_number, email_address,
-                         purok, barangay, citymun, province, user_role, date_created, password)
+                         address, user_role, date_created, password)
                     VALUES
                         (:first_name, :middle_name, :last_name, :contact_number, :email_address,
-                         :purok, :barangay, :citymun, :province, 'user', CURDATE(), :password)
+                         :address, 'user', CURDATE(), :password)
                 ");
 
                 $stmt->execute([
@@ -66,11 +63,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     ':last_name'      => $last_name,
                     ':contact_number' => $contact_number,
                     ':email_address'  => $email_address,
-                    ':purok'          => $purok,
-                    ':barangay'       => $barangay,
-                    ':citymun'        => $citymun,
-                    ':province'       => $province,
-                    ':password'       => $password,
+                    ':address'        => $address,
+                    ':password'       => $hashed,
                 ]);
 
                 $new_id   = $pdo->lastInsertId();
@@ -195,46 +189,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         </div>
                     </div>
 
-                    <!-- ── Address Fields ── -->
-                    <div class="auth-row">
-                        <div class="auth-field">
-                            <label class="auth-label">Purok</label>
-                            <div class="auth-input-wrap">
-                                <i class="bi bi-geo"></i>
-                                <input type="text" name="purok" class="auth-input"
-                                       placeholder="Purok 1"
-                                       value="<?= htmlspecialchars($_POST['purok'] ?? '') ?>" />
-                            </div>
-                        </div>
-                        <div class="auth-field">
-                            <label class="auth-label">Barangay</label>
-                            <div class="auth-input-wrap">
-                                <i class="bi bi-geo"></i>
-                                <input type="text" name="barangay" class="auth-input"
-                                       placeholder="Barangay"
-                                       value="<?= htmlspecialchars($_POST['barangay'] ?? '') ?>" />
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="auth-row">
-                        <div class="auth-field">
-                            <label class="auth-label">City / Municipality</label>
-                            <div class="auth-input-wrap">
-                                <i class="bi bi-building"></i>
-                                <input type="text" name="citymun" class="auth-input"
-                                       placeholder="City or Municipality"
-                                       value="<?= htmlspecialchars($_POST['citymun'] ?? '') ?>" />
-                            </div>
-                        </div>
-                        <div class="auth-field">
-                            <label class="auth-label">Province</label>
-                            <div class="auth-input-wrap">
-                                <i class="bi bi-map"></i>
-                                <input type="text" name="province" class="auth-input"
-                                       placeholder="Province"
-                                       value="<?= htmlspecialchars($_POST['province'] ?? '') ?>" />
-                            </div>
+                    <!-- ── Address Field ── -->
+                    <div class="auth-field">
+                        <label class="auth-label">Address</label>
+                        <div class="auth-input-wrap">
+                            <i class="bi bi-geo-alt"></i>
+                            <input type="text" name="address" class="auth-input"
+                                   placeholder="Purok, Barangay, City/Municipality, Province"
+                                   value="<?= htmlspecialchars($_POST['address'] ?? '') ?>" />
                         </div>
                     </div>
 

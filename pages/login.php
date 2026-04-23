@@ -46,8 +46,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $_SESSION['user'] = [
                     'id'     => $user->id,
                     'name'   => $user->first_name . ' ' . $user->last_name,
+                    'first_name'  => $user->first_name,
+                    'last_name'  => $user->last_name,
                     'email'  => $user->email_address,
-                    'avatar' => $initials,
+                    'contact_number' => $user->contact_number,
+                    'address' => $user->address,
+                    'date_created' => $user->date_created,
                     'role'   => $user->user_role,
                 ];
                 // ── Redirect based on role ──

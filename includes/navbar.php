@@ -25,13 +25,11 @@ $user = currentUser();
             <!-- Logged-in: show Order Now + user dropdown -->
             <div class="user-menu-wrap">
                 <button class="user-avatar-btn" onclick="toggleUserMenu(event)">
-                    <span class="user-avatar"><?= htmlspecialchars($user['avatar']) ?></span>
                     <span class="user-name"><?= htmlspecialchars(explode(' ', $user['name'])[0]) ?></span>
                     <i class="bi bi-chevron-down user-caret"></i>
                 </button>
                 <div class="user-dropdown" id="userDropdown">
                     <div class="user-dropdown-header">
-                        <div class="user-avatar-lg"><?= htmlspecialchars($user['avatar']) ?></div>
                         <div>
                             <strong><?= htmlspecialchars($user['name']) ?></strong>
                             <span><?= htmlspecialchars($user['email']) ?></span>

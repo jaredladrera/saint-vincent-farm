@@ -23,7 +23,14 @@ function toggleCartDrawer() {
 }
 
 // ── ADD TO CART (from product card) ──
+
 function addToCart(id, name, icon, price, unit, btnEl) {
+
+    if (!window.isLoggedIn) {
+        window.location.href = 'index.php?page=login&redirect=shop';
+        return;
+    }
+
     const existing = cart.find(i => i.id === id);
     if (existing) {
         existing.qty++;
@@ -141,6 +148,12 @@ window._modalPrice     = '';
 window._modalUnit      = '';
 
 function openModal(name, desc, icon, price, unit, tagsStr, productId) {
+
+    if (!window.isLoggedIn) {
+        window.location.href = 'index.php?page=login&redirect=shop';
+        return;
+    }
+
     window._modalProductId = productId !== undefined ? productId : null;
     window._modalPrice     = price;
     window._modalUnit      = unit;

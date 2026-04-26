@@ -2,6 +2,7 @@
 require_once __DIR__ . '/auth.php';
 $current_page = $_GET['page'] ?? 'home';
 $user = currentUser();
+
 ?>
 <nav class="main-nav">
     <a class="nav-logo" href="index.php?page=home">
@@ -94,6 +95,15 @@ $user = currentUser();
         <?php endif; ?>
     </div>
 </div>
+
+<script>
+    window.isLoggedIn   = <?= $user ? 'true' : 'false' ?>;
+    window.currentUserId = <?= $user ? (int)$user['id'] : 'null' ?>;
+
+    document.addEventListener('DOMContentLoaded', function () {
+        updateCartUI(); // pull cart from DB immediately on load
+    });
+</script>
 
 <!-- User dropdown backdrop -->
 <!-- <div class="user-backdrop" id="userBackdrop" onclick="toggleUserMenu()"></div> -->

@@ -1,6 +1,6 @@
 <?php
 
-require "./shared/crud.php";
+// require "./shared/crud.php";
 // ══════════════════════════════════
 // REGISTER PAGE — pages/register.php
 // ══════════════════════════════════
@@ -46,7 +46,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             if ($checkStmt->fetch()) {
                 $error = 'An account with that email address already exists.';
             } else {
-                $hashed = password_hash($password, PASSWORD_DEFAULT);
+                // $hashed = password_hash($password, PASSWORD_DEFAULT);
 
                 $stmt = $pdo->prepare("
                     INSERT INTO user_profile
@@ -64,7 +64,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     ':contact_number' => $contact_number,
                     ':email_address'  => $email_address,
                     ':address'        => $address,
-                    ':password'       => $hashed,
+                    ':password'       => $password,
                 ]);
 
                 $new_id   = $pdo->lastInsertId();

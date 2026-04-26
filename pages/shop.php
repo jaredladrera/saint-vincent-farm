@@ -1,7 +1,11 @@
 <!-- ══ SHOP PAGE ══ -->
 <?php
 include_once './config/pdo_connection.php';
+include_once './includes/auth.php';
+
 $isLoggedIn = isset($_SESSION['user']);
+
+$user = currentUser();
 
 // ── Instantiate your Connect class and grab the PDO connection ───────────────
 $db  = new Connect();
@@ -85,7 +89,7 @@ $products = array_map(function (object $row) use ($catMeta, $defaultMeta): array
         'bg'       => $meta['bg'],
         'badge'    => pickBadge($row),
         'desc'     => htmlspecialchars($row->condition_notes, ENT_QUOTES),
-        'price'    => '₱' . number_format((int) $row->price),
+        'price'    => number_format((int) $row->price),
         'unit'     => $meta['unit'],
         'tags'     => buildTags($row),
         'detail'   => htmlspecialchars($row->condition_notes, ENT_QUOTES)
@@ -185,10 +189,32 @@ $filterCats = array_unique(array_column($products, 'cat'));
                                     <span class="avail-dot"></span>
                                     Available (<?= $p['quantity'] ?> left)
                                 </span>
-                                <button class="btn-order"
-                                    onclick="event.stopPropagation(); addToCart(<?= $p['id'] ?>, '<?= addslashes($p['name']) ?>', '<?= $p['icon'] ?>', '<?= $p['price'] ?>', '<?= $p['unit'] ?>', this)">
-                                    <i class="bi bi-cart-plus"></i> Add to Cart
-                                </button>
+                                <!-- Quantity stepper -->
+                                <div class="cart-row" onclick="event.stopPropagation()">
+                                    <div class="qty-stepper">
+                                        <button type="button" class="qty-btn qty-minus"
+                                            onclick="stepQty(this, -1, <?= $p['quantity'] ?>)">&#8722;</button>
+                                        <input type="number"
+                                               class="qty-input"
+                                               id="qty-<?= $p['id'] ?>"
+                                               value="1"
+                                               min="1"
+                                               max="<?= $p['quantity'] ?>"
+                                               readonly>
+                                        <button type="button" class="qty-btn qty-plus"
+                                            onclick="stepQty(this, 1, <?= $p['quantity'] ?>)">&#43;</button>
+                                    </div>
+                                    <button class="btn-order"
+                                        onclick="addToCart(
+                                            <?= $p['id'] ?>,
+                                            '<?= $user['id'] ?>',
+                                            '<?= $p['price'] ?>',
+                                            parseInt(document.getElementById('qty-<?= $p['id'] ?>').value),
+                                            this
+                                        )">
+                                        <i class="bi bi-cart-plus"></i> Add to Cart
+                                    </button>
+                                </div>
                             <?php endif; ?>
                         </div>
                     </div>
@@ -201,6 +227,8 @@ $filterCats = array_unique(array_column($products, 'cat'));
     </div>
 </div>
 
+
 <script>
     window.isLoggedIn = <?php echo isset($_SESSION['user']) ? 'true' : 'false'; ?>;
+
 </script>

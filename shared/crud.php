@@ -1,24 +1,23 @@
 <?php
- include './config/pdo_connection.php';
+ include './../config/pdo_connection.php';
 
- class DataOperation extends Connect{
+ class CrudOperation extends Connect{
 
 	public $error;
 
-	public function insertAny($tbl_name, $data, $status){
-		$sql = '';  
-		$sql .= "INSERT INTO ".$tbl_name;
-		$sql .= "(".implode(",", array_keys($data)).") VALUES ";
-		$sql .= "('".implode("','", array_values($data))."')";
+	public function insertAny($tbl_name, $data, $status) {
+		$columns = implode(",", array_keys($data));
+		$placeholders = implode(",", array_map(fn($k) => ":$k", array_keys($data)));
+
+		$sql = "INSERT INTO {$tbl_name} ({$columns}) VALUES ({$placeholders})";
 
 		$stm = $this->connection->prepare($sql);
-        
-        if($stm->execute()) {
-            exit($status);
-        } else {
-            exit($sql);
-        }
 
+		if ($stm->execute($data)) {
+			echo $status; // ✅ use echo, not exit — exit kills the script abruptly
+		} else {
+			echo "Insert failed.";
+		}
 	}
 
 	function updateAny($tbl_name, $data, $id){

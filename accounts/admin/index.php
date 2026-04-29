@@ -1,5 +1,11 @@
 <?php
 session_start();
+
+if (!isset($_SESSION['user'])) {
+    header("Location: ../../index.php");
+    exit(); // Always call exit after header redirect
+}
+
 $user = $_SESSION['user'];
 ?>
 <?php

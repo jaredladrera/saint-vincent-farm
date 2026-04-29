@@ -227,7 +227,7 @@ $(function () {
     // VIEW ORDER ITEMS
     $(document).on('click', '.viewOrderBtn', function () {
         const id = $(this).data('id');
-
+            
         $.ajax({
             url: 'ajax/get_order_items.php',
             type: 'POST',

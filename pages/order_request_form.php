@@ -11,6 +11,7 @@ $payment_options = [
 // Cart total from session
 $cart_items   = $_SESSION['cart']         ?? [];
 $cart_total   = 0;
+$order_total = $_GET['grandtotal'] ?? 0;
 foreach ($cart_items as $item) {
     $cart_total += ($item['price'] ?? 0) * ($item['quantity'] ?? 1);
 }
@@ -23,7 +24,7 @@ $pdo = $db->connection;
 
 $stmt = $pdo->prepare("
     SELECT 
-        SUM(quantity * amount) AS grand_total,
+        SUM(amount) AS grand_total,
          GROUP_CONCAT(DISTINCT product_id) AS product_ids
     FROM cart
     WHERE user_id = ? AND cart = 1

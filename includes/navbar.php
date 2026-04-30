@@ -34,7 +34,7 @@ $user = currentUser();
                 </button>
                 <div class="user-dropdown" id="userDropdown">
                     <div class="user-dropdown-header">
-                        <div class="user-avatar-lg"><?= htmlspecialchars($user['avatar']) ?></div>
+                        <div class="user-avatar-lg"><?= htmlspecialchars('U') ?></div>
                         <a href="index.php?page=profile" class="user-info-link">
                             <div>
                                 <strong><?= htmlspecialchars($user['name']) ?></strong>
@@ -84,13 +84,15 @@ $user = currentUser();
             <p>Your cart is empty</p>
         </div>
     </div>
+    <!-- hidden text -->
+    <input type="hidden" id="hidden-total">
     <div class="cart-drawer-footer" id="cartFooter" style="display:none">
         <div class="cart-total">
             <span>Total Items</span>
             <strong id="cartTotalCount">0</strong>
         </div>
         <?php if ($user): ?>
-            <a href="index.php?page=order_request_form" class="cart-checkout-btn" onclick="toggleCartDrawer()">
+            <a href="index.php?page=order_request_form&grandtotal=" class="cart-checkout-btn" onclick="toggleCartDrawer()">
                 <i class="bi bi-bag-check"></i> Proceed to Order
             </a>
         <?php else: ?>
@@ -109,6 +111,21 @@ $user = currentUser();
     document.addEventListener('DOMContentLoaded', function () {
         updateCartUI(); // pull cart from DB immediately on load
     });
+
+//     function goToOrder(e) {
+//     e.preventDefault(); // stop default link
+
+//     let total = document.getElementById('hidden-total').value;
+
+//     // optional: validation
+//     if (!total) {
+//         alert("Total is empty");
+//         return;
+//     }
+
+//     // redirect with value
+//     window.location.href = "index.php?page=order_request_form&grandtotal=" + encodeURIComponent(total);
+// }
 </script>
 
 <!-- User dropdown backdrop -->

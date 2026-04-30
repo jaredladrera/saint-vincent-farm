@@ -10,13 +10,12 @@ $qr_map = [
 ];
 $qr = $qr_map[$payment_method] ?? null;
 
-echo "order id lance". $order_id;
 
 function uploadPaymentProof(array $file, string $order_id): array {
 
 
     $id = $_POST["order_id"];
-    $payment_method = $_POST["payment_mode"];
+    $payment_method = $_POST["payment_method"];
 
     // ── Validate file ─────────────────────────────────────────────────────────
     if ($file['error'] !== UPLOAD_ERR_OK) {
@@ -56,8 +55,8 @@ function uploadPaymentProof(array $file, string $order_id): array {
             return ['success' => false, 'message' => 'Failed to save file.'];
         } 
 
-        echo "order id". $id;
-        echo "filename". $filename;
+        // echo "order id". $id;
+        // echo "filename". $filename;
 
     // ── Save to database ──────────────────────────────────────────────────────
     try {

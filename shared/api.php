@@ -17,7 +17,8 @@ if(isset($_POST['key'])):
               "user_id" => $_POST["user_id"],
               "quantity" => $_POST["quantity"],
               "amount" => $_POST["amount"],
-              "created_at" => date("Y-m-d")
+              "created_at" => date("Y-m-d"),
+              "cart" => true
         );
 
         $obj->insertAny("cart", $data, $message);
@@ -36,7 +37,7 @@ if(isset($_POST['key'])):
                 p.quantity AS stock_quantity
             FROM cart c
             JOIN livestock p ON c.product_id = p.id
-            WHERE c.user_id = ?
+            WHERE c.user_id = ? AND c.cart = 1
         ");
         $stmt->execute([$user_id]);
         echo json_encode($stmt->fetchAll(PDO::FETCH_ASSOC));
@@ -55,6 +56,97 @@ if(isset($_POST['key'])):
         $stmt = $pdo->prepare("DELETE FROM cart WHERE id = ?");
         $stmt->execute([$cart_id]);
         echo 'ok';
+    endif;
+
+
+    if($key === 'checkout'):
+        $data = array(
+              "user_id" => $_POST["user_id"],
+              "order_status" => $_POST["order_status"],
+              "total_amount" => $_POST["total_amount"],
+              "mode_of_payment" => $_POST["mode_of_payment"],
+              "notes" => $_POST["notes"],
+              "prefered_delivery_date" => $_POST["prefered_delivery_date"],
+              "created_at" => date("Y-m-d"),
+              "order_ids" => $_POST["order_ids"]
+        );
+
+       $inserted_id = $obj->insertGetId("orders", $data);
+
+       echo $inserted_id;
+        
+    endif;
+
+
+  if($key === 'updateCart'):
+        $ids = array_map('intval', explode(',', $_POST['order_ids']));
+        $user_id = $_POST['user_id'];
+
+        // safety check
+        if (empty($ids) || !is_array($ids)) {
+            exit('Invalid IDs');
+        }
+
+        // create ?,?,?
+        // $placeholders = implode(',', array_fill(0, count($ids), '?'));
+
+        // echo "placeholder". $placeholders;
+
+        //add user_id condition
+        $sql = "UPDATE cart SET cart = 0 WHERE user_id = ?";
+
+        $stmt = $pdo->prepare($sql);
+
+        // merge ids + user_id
+        // $params = array_merge([$user_id]);
+
+        $stmt->execute([$user_id]);
+
+        if ($stmt->rowCount() > 0) {
+            echo 'ok';
+        } else {
+            echo 'No rows updated (check IDs or user_id)';
+        }
+
+    endif;
+
+    if($key === "changePassword"): 
+
+        $old_password = $_POST['old_password'] ?? '';
+        $new_password = $_POST['new_password'] ?? '';
+        $user_id = $_POST['login_id'];
+        
+        if (empty($old_password) || empty($new_password)) {
+            echo json_encode(['success' => false, 'message' => 'All fields are required.']); exit;
+        }
+        if (strlen($new_password) < 8) {
+            echo json_encode(['success' => false, 'message' => 'Password must be at least 8 characters.']); exit;
+        }
+        
+        try {
+            $db   = new Connect();
+            $stmt = $db->connection->prepare("SELECT password FROM user_profile WHERE id = ?");
+            $stmt->execute([$user_id]);
+            $user = $stmt->fetch();
+        
+        if (!$user || $old_password !== $user->password) {
+            echo json_encode([
+                'success' => false,
+                'message' => 'Current password is incorrect.'
+            ]);
+            exit;
+        }
+                
+            // $hashed = password_hash($new_password, PASSWORD_DEFAULT);
+            $upd    = $db->connection->prepare("UPDATE user_profile SET password = ? WHERE id = ?");
+            $upd->execute([$new_password, $user_id]);
+        
+            echo json_encode(['success' => true, 'message' => 'Password updated successfully!']);
+        } catch (PDOException $e) {
+            echo json_encode(['success' => false, 'message' => 'Database error. Please try again.']);
+        }
+
+
     endif;
 
 endif;

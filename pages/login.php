@@ -49,6 +49,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     'email'  => $user->email_address,
                     'avatar' => $initials,
                     'role'   => $user->user_role,
+                    'address' => $user->address,
+                    'contact' => $user->contact_number,
                 ];
                 // ── Redirect based on role ──
                 redirectByRole($user->user_role, $redirect);

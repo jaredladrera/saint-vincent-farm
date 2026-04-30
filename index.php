@@ -9,9 +9,8 @@ require_once BASE_DIR . '/includes/auth.php';
 
 $page = $_GET['page'] ?? 'home';
 
-
 // ── Logout must be FIRST before any output ──
-if (($_GET['page'] ?? '') === 'logout') {
+if ($page === 'logout') {
     session_start();
     session_unset();
     session_destroy();
@@ -19,25 +18,29 @@ if (($_GET['page'] ?? '') === 'logout') {
     exit;
 }
 
-require_once BASE_DIR . '/includes/auth.php';
-
 $allowed_pages = [
-    'home', 'shop', 'features', 'about', 'contact', 
-    'login', 'register',
-    'account/admin',  // ← add this
-    'account/staff',  // ← add this
+    'home', 'shop', 'features', 'about', 'contact', 'profile', 'my_order',
+    'login', 'register', 'order_request_form', 'upload_proof', 'order_success',
+    'account/admin', 'account/staff',
 ];
 if (!in_array($page, $allowed_pages)) $page = 'home';
 
-// if ($page === 'contact' && !isLoggedIn()) {
-//     header('Location: ' . BASE_URL . '/index.php?page=login&redirect=contact');
-//     exit;
-// }
+// ── Public pages (no login required) ──
+$public_pages = ['home', 'shop', 'features', 'about', 'contact', 'login', 'register'];
+
+// ── Redirect logged-in users away from login/register ──
 if (in_array($page, ['login', 'register']) && isLoggedIn()) {
     $redirect = $_GET['redirect'] ?? 'home';
     header('Location: ' . BASE_URL . '/index.php?page=' . urlencode($redirect));
     exit;
 }
+
+// ── Protect all non-public pages — BEFORE any HTML output ──
+if (!in_array($page, $public_pages) && !isLoggedIn()) {
+    header('Location: ' . BASE_URL . '/index.php?page=login&redirect=' . urlencode($page));
+    exit;
+}
+
 
 $titles = [
     'home'     => 'Home',
@@ -75,6 +78,11 @@ $auth_pages = ['login', 'register'];
     elseif  ($page == 'contact')  { require BASE_DIR . '/pages/contact.php'; }
     elseif  ($page == 'login')    { require BASE_DIR . '/pages/login.php'; }
     elseif  ($page == 'register') { require BASE_DIR . '/pages/register.php'; }
+    elseif  ($page == 'upload_proof') { require BASE_DIR . '/pages/upload_proof.php'; }
+    elseif  ($page == 'order_success') { require BASE_DIR . '/pages/order_success.php'; }
+    elseif  ($page == 'my_order') { require BASE_DIR . '/pages/my_order.php'; }
+    elseif  ($page == 'order_request_form') { require BASE_DIR . '/pages/order_request_form.php'; }
+    elseif  ($page == 'profile') { require BASE_DIR . '/pages/profile.php'; }
     else                          { require BASE_DIR . '/pages/404.php'; }
 ?>
 </main>

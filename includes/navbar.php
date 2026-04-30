@@ -1,7 +1,10 @@
 <?php
 require_once __DIR__ . '/auth.php';
+require_once __DIR__ . './../config/pdo_connection.php';
+
 $current_page = $_GET['page'] ?? 'home';
 $user = currentUser();
+
 
 ?>
 <nav class="main-nav">
@@ -31,12 +34,15 @@ $user = currentUser();
                 </button>
                 <div class="user-dropdown" id="userDropdown">
                     <div class="user-dropdown-header">
-                        <div>
-                            <strong><?= htmlspecialchars($user['name']) ?></strong>
-                            <span><?= htmlspecialchars($user['email']) ?></span>
-                        </div>
+                        <div class="user-avatar-lg"><?= htmlspecialchars($user['avatar']) ?></div>
+                        <a href="index.php?page=profile" class="user-info-link">
+                            <div>
+                                <strong><?= htmlspecialchars($user['name']) ?></strong>
+                                <span><?= htmlspecialchars($user['email']) ?></span>
+                            </div>
+                        </a>
                     </div>
-                    <a href="index.php?page=contact" class="user-dropdown-item text-black">
+                    <a href="index.php?page=my_order" class="user-dropdown-item text-black">
                         <i class="bi bi-bag"></i> My Orders
                     </a>
                 <a href="#"
@@ -84,7 +90,7 @@ $user = currentUser();
             <strong id="cartTotalCount">0</strong>
         </div>
         <?php if ($user): ?>
-            <a href="index.php?page=contact" class="cart-checkout-btn" onclick="toggleCartDrawer()">
+            <a href="index.php?page=order_request_form" class="cart-checkout-btn" onclick="toggleCartDrawer()">
                 <i class="bi bi-bag-check"></i> Proceed to Order
             </a>
         <?php else: ?>

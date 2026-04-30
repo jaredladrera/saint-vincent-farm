@@ -75,6 +75,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     'name'   => $first_name . ' ' . $last_name,
                     'email'  => $email_address,
                     'avatar' => $initials,
+                    'address' => $user->address,
+                    'contact' => $user->contact_number,
                     'role'   => 'user',
                 ];
 

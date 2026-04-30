@@ -53,6 +53,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     'address' => $user->address,
                     'date_created' => $user->date_created,
                     'role'   => $user->user_role,
+                    'address' => $user->address,
+                    'contact' => $user->contact_number,
                 ];
                 // ── Redirect based on role ──
                 redirectByRole($user->user_role, $redirect);

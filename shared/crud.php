@@ -20,6 +20,21 @@
 		}
 	}
 
+	public function insertGetId($tbl_name, $data) {
+		$columns = implode(",", array_keys($data));
+		$placeholders = implode(",", array_map(fn($k) => ":$k", array_keys($data)));
+
+		$sql = "INSERT INTO {$tbl_name} ({$columns}) VALUES ({$placeholders})";
+
+		$stm = $this->connection->prepare($sql);
+
+		if ($stm->execute($data)) {
+			return $this->connection->lastInsertId(); 
+		} else {
+			return false;
+		}
+	}
+
 	function updateAny($tbl_name, $data, $id){
 
 			$sql = '';

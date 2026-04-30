@@ -1,27 +1,10 @@
 <!-- ══ CONTACT / ORDER PAGE ══ -->
-<?php
-$livestock_options = [
-    '🐷 Lechon-Ready Pig',
-    '🐽 Feeder Pig (Piglet)',
-    '🐐 Native Goat (Kambing)',
-    '🐑 Breeding Goat (Doe)',
-    '🐔 Native Chicken (Manok)',
-    '🥚 Farm Eggs (Itlog)',
-];
-
-$payment_options = [
-    'Cash on Delivery',
-    'GCash',
-    'Bank Transfer',
-    'Cash on Pickup',
-];
-?>
 
 <div class="page-hero">
     <div class="container">
         <div class="section-label">Get In Touch</div>
-        <h1>Place an <span style="color:var(--amber)">Order</span></h1>
-        <p>Interested in our livestock? Fill in the form and we'll get back to you promptly.</p>
+        <h1>Find <span style="color:var(--amber)">Us</span></h1>
+        <p>Visit us at the farm or reach out through any of our contact channels.</p>
     </div>
 </div>
 
@@ -29,82 +12,23 @@ $payment_options = [
     <div class="container">
         <div class="row g-4">
 
-            <!-- Order Form -->
+            <!-- Map -->
             <div class="col-lg-7">
                 <div class="contact-form-wrap">
                     <h5 style="font-weight:700;color:var(--green-deep);margin-bottom:1.5rem;font-size:1.05rem">
-                        Customer Order Form
+                        Farm Location
                     </h5>
-
-                    <form id="orderForm">
-                        <div class="row g-3">
-
-                            <div class="col-sm-6">
-                                <label class="form-label-sm">Full Name</label>
-                                <input type="text" name="full_name" class="form-control-custom"
-                                       placeholder="Juan dela Cruz" required />
-                            </div>
-
-                            <div class="col-sm-6">
-                                <label class="form-label-sm">Contact Number</label>
-                                <input type="tel" name="contact" class="form-control-custom"
-                                       placeholder="09XX XXX XXXX" required />
-                            </div>
-
-                            <div class="col-12">
-                                <label class="form-label-sm">Email Address</label>
-                                <input type="email" name="email" class="form-control-custom"
-                                       placeholder="juan@email.com" />
-                            </div>
-
-                            <div class="col-sm-6">
-                                <label class="form-label-sm">Livestock Type</label>
-                                <select name="livestock" class="form-control-custom" required>
-                                    <option value="">Select livestock...</option>
-                                    <?php foreach ($livestock_options as $opt): ?>
-                                        <option value="<?= $opt ?>"><?= $opt ?></option>
-                                    <?php endforeach; ?>
-                                </select>
-                            </div>
-
-                            <div class="col-sm-6">
-                                <label class="form-label-sm">Quantity / Weight</label>
-                                <input type="text" name="quantity" class="form-control-custom"
-                                       placeholder="e.g. 2 heads / 5 kg" required />
-                            </div>
-
-                            <div class="col-12">
-                                <label class="form-label-sm">Delivery Address</label>
-                                <input type="text" name="address" class="form-control-custom"
-                                       placeholder="Barangay, Municipality, Batangas" required />
-                            </div>
-
-                            <div class="col-sm-6">
-                                <label class="form-label-sm">Preferred Delivery Date</label>
-                                <input type="date" name="delivery_date" class="form-control-custom" />
-                            </div>
-
-                            <div class="col-sm-6">
-                                <label class="form-label-sm">Payment Method</label>
-                                <select name="payment" class="form-control-custom">
-                                    <?php foreach ($payment_options as $pay): ?>
-                                        <option value="<?= $pay ?>"><?= $pay ?></option>
-                                    <?php endforeach; ?>
-                                </select>
-                            </div>
-
-                            <div class="col-12">
-                                <label class="form-label-sm">Additional Notes</label>
-                                <textarea name="notes" class="form-control-custom" rows="3"
-                                          placeholder="Special requests, slaughter preference, etc."></textarea>
-                            </div>
-
-                        </div>
-
-                        <button type="submit" class="btn-submit">
-                            <i class="bi bi-send"></i> Submit Order Request
-                        </button>
-                    </form>
+                    <div style="border-radius:12px;overflow:hidden;box-shadow:0 2px 12px rgba(0,0,0,0.10);">
+                        <iframe
+                            src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3869.0400530334477!2d121.08664259999999!3d14.133742199999999!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x33bd65e0f10919eb%3A0xb2e548499145b695!2sSaint%20Vincent%20gamefarm!5e0!3m2!1sen!2sph!4v1777253176719!5m2!1sen!2sph"
+                            width="100%"
+                            height="450"
+                            style="border:0;display:block;"
+                            allowfullscreen=""
+                            loading="lazy"
+                            referrerpolicy="no-referrer-when-downgrade">
+                        </iframe>
+                    </div>
                 </div>
             </div>
 

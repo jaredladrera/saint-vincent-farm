@@ -3,6 +3,7 @@ $current = $_GET['page'] ?? 'dashboard';
 $titles = [
     'dashboard' => 'Dashboard',
     'products'  => 'Products',
+    'orders'  => 'Orders',
     'users'  => 'Users',
     'profile'   => 'Profile',
 ];
@@ -31,18 +32,18 @@ $page_title = $titles[$current] ?? 'Admin';
 
     <div class="topbar-right">
         <!-- Search -->
-        <div class="topbar-search d-none d-md-flex">
+        <!-- <div class="topbar-search d-none d-md-flex">
             <i class="bi bi-search"></i>
             <input type="text" placeholder="Search…" />
-        </div>
+        </div> -->
 
         <!-- Notifications -->
-        <div class="position-relative">
+        <!-- <div class="position-relative">
             <button class="topbar-icon-btn" title="Notifications">
                 <i class="bi bi-bell"></i>
                 <span class="notif-badge">3</span>
             </button>
-        </div>
+        </div> -->
 
         <!-- Avatar -->
         <a href="<?= BASE_URL ?>/index.php?page=profile" class="topbar-avatar" title="Profile">

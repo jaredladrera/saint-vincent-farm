@@ -1,5 +1,10 @@
-<?php // includes/sidebar.php
+<?php
 $current = $_GET['page'] ?? 'dashboard';
+
+$role = $_SESSION['user']['role'] ?? 'User';
+
+$isAdmin = strtolower($role) === 'administrator';
+$isStaff = strtolower($role) === 'staff';
 ?>
 <!-- Sidebar Overlay (mobile) -->
 <div class="sidebar-overlay" id="sidebarOverlay"></div>
@@ -19,37 +24,49 @@ $current = $_GET['page'] ?? 'dashboard';
         <p class="nav-label">Main</p>
         <ul class="nav flex-column">
 
+             <!-- Dashboard (Admin) -->
+            <?php if ($isAdmin): ?>
             <li class="nav-item">
                 <a href="<?= BASE_URL ?>/index.php?page=dashboard"
-                   class="nav-link <?= $current === 'dashboard' ? 'active' : '' ?>">
+                class="nav-link <?= $current === 'dashboard' ? 'active' : '' ?>">
                     <i class="bi bi-speedometer2"></i>
                     <span>Dashboard</span>
                 </a>
             </li>
+            <?php endif; ?>
 
+            <!-- PRODUCTS (ADMIN + STAFF) -->
+            <?php if ($isAdmin || $isStaff): ?>
             <li class="nav-item">
                 <a href="<?= BASE_URL ?>/index.php?page=products"
-                   class="nav-link <?= $current === 'products' ? 'active' : '' ?>">
+                class="nav-link <?= $current === 'products' ? 'active' : '' ?>">
                     <i class="bi bi-box-seam"></i>
                     <span>Products</span>
                 </a>
             </li>
+            <?php endif; ?>
 
+            <!-- ORDERS (ADMIN + STAFF) -->
+            <?php if ($isAdmin || $isStaff): ?>
             <li class="nav-item">
                 <a href="<?= BASE_URL ?>/index.php?page=orders"
-                   class="nav-link <?= $current === 'orders' ? 'active' : '' ?>">
+                class="nav-link <?= $current === 'orders' ? 'active' : '' ?>">
                     <i class="bi bi-bag"></i>
                     <span>Orders</span>
                 </a>
             </li>
+            <?php endif; ?>
 
+            <!-- USERS (ADMIN ONLY) -->
+            <?php if ($isAdmin): ?>
             <li class="nav-item">
                 <a href="<?= BASE_URL ?>/index.php?page=users"
-                   class="nav-link <?= $current === 'users' ? 'active' : '' ?>">
+                class="nav-link <?= $current === 'users' ? 'active' : '' ?>">
                     <i class="bi bi-people-fill"></i>
                     <span>Users</span>
                 </a>
             </li>
+            <?php endif; ?>
 
         </ul>
 
@@ -65,7 +82,7 @@ $current = $_GET['page'] ?? 'dashboard';
             </li>
 
             <li class="nav-item">
-                <a href="#" class="nav-link text-danger-nav">
+                <a href="../../includes/logout.php" class="nav-link text-danger-nav">
                     <i class="bi bi-box-arrow-left"></i>
                     <span>Logout</span>
                 </a>
@@ -76,10 +93,10 @@ $current = $_GET['page'] ?? 'dashboard';
 
     <!-- User card at bottom -->
     <div class="sidebar-user">
-        <img src="https://ui-avatars.com/api/?name=Admin+User&background=0B6B1C&color=fff&size=80" alt="Avatar" />
+        <!-- <img src="https://ui-avatars.com/api/?name=Admin+User&background=0B6B1C&color=fff&size=80" alt="Avatar" /> -->
         <div class="sidebar-user-info">
-            <span class="user-name">Admin User</span>
-            <span class="user-role">Super Admin</span>
+            <span class="user-name"><?= $user['name'] ?></span>
+            <span class="user-role"><?= $user['role'] ?></span>
         </div>
     </div>
 

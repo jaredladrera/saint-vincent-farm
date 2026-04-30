@@ -29,7 +29,6 @@ $user = currentUser();
             <!-- Logged-in: show Order Now + user dropdown -->
             <div class="user-menu-wrap">
                 <button class="user-avatar-btn" onclick="toggleUserMenu(event)">
-                    <span class="user-avatar"><?= htmlspecialchars($user['avatar']) ?></span>
                     <span class="user-name"><?= htmlspecialchars(explode(' ', $user['name'])[0]) ?></span>
                     <i class="bi bi-chevron-down user-caret"></i>
                 </button>

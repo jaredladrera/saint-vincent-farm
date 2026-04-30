@@ -1,4 +1,14 @@
 <?php
+session_start();
+
+if (!isset($_SESSION['user'])) {
+    header("Location: ../../index.php");
+    exit(); // Always call exit after header redirect
+}
+
+$user = $_SESSION['user'];
+?>
+<?php
 // ══════════════════════════════════
 // MAIN ROUTER — index.php
 // ══════════════════════════════════
@@ -7,12 +17,13 @@ define('BASE_URL', rtrim(dirname($_SERVER['SCRIPT_NAME']), '/\\'));
 
 $page = $_GET['page'] ?? 'dashboard';
 
-$allowed_pages = ['dashboard', 'products', 'users', 'profile'];
+$allowed_pages = ['dashboard', 'products', 'orders', 'users', 'profile'];
 if (!in_array($page, $allowed_pages)) $page = 'dashboard';
 
 $titles = [
     'dashboard' => 'Dashboard',
     'products'  => 'Products',
+    'orders'  => 'Orders',
     'users'  => 'Users',
     'profile'   => 'Profile',
 ];
@@ -38,6 +49,7 @@ $page_title = $titles[$page] ?? 'Admin';
             <?php
                 if      ($page === 'dashboard') { require BASE_DIR . '/pages/dashboard.php'; }
                 elseif  ($page === 'products')  { require BASE_DIR . '/pages/products.php'; }
+                elseif  ($page === 'orders')  { require BASE_DIR . '/pages/orders.php'; }
                 elseif  ($page === 'users')  { require BASE_DIR . '/pages/users.php'; }
                 elseif  ($page === 'profile')   { require BASE_DIR . '/pages/profile.php'; }
                 else                            { require BASE_DIR . '/pages/dashboard.php'; }

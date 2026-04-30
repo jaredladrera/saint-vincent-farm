@@ -1,4 +1,5 @@
 <?php
+ob_start(); // ← ADD THIS AS THE VERY FIRST LINE
 // ══════════════════════════════════
 // MAIN ROUTER — index.php
 // ══════════════════════════════════
@@ -93,5 +94,7 @@ $auth_pages = ['login', 'register'];
 <?php endif; ?>
 
 <?php require BASE_DIR . '/includes/scripts.php'; ?>
+
+<?php ob_end_flush(); ?> 
 </body>
 </html>

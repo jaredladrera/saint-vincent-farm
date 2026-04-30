@@ -180,6 +180,7 @@ function renderCartUI(items) {
     }).join('');
 
     const grandTotal = items.reduce((sum, i) => sum + parseFloat(i.price) * parseInt(i.cart_quantity), 0);
+    $('#hidden-total').val(grandTotal);
     document.getElementById('cartTotalCount').textContent =
         total + (total === 1 ? ' item' : ' items') + ' — ₱' + grandTotal.toFixed(2);
 }
@@ -223,26 +224,27 @@ function confirm_order(user_id, grandTotal, product_ids) {
                     // window.location.href = `page.php?upload=${user_id}&status=${status}`;
                     window.location.href = `index.php?page=upload_proof&total=${grandTotal}&payment_mode=${payment_method}&inserted_id=${response}`;
                 } else {
-                    console.log("product_ids", product_ids);
-                    // alert("hello");
-                    //update the cart / remove to the cart
+                    // console.log("product_ids", product_ids);
                     $.ajax({
                         url: './shared/api.php',
                         method: 'POST',
-                        dataType: 'text', 
+                        dataType: 'text',
                         data: {
                             key: 'updateCart',
                             user_id,
                             order_ids: product_ids
                         },
                         success: (res) => {
-                            console.log("response", res);
-                            // window.location.href = `index.php?page=order_success&payment=${payment_method}`;
+                                window.location.href =
+                                    `index.php?page=order_success&payment=${payment_method}`;
+                            
                         },
                         error: (er) => {
                             console.error('Checkout failed:', er.responseText);
                         }
-                    })
+                    });
+                    // alert("hello");
+                    //update the cart / remove to the cart
 
                 }
             } else {

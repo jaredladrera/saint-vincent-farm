@@ -385,8 +385,8 @@ function confirm_order(user_id, grandTotal, product_ids) {
                         success: function(res2) {
 
                             // FINAL: redirect only when ALL succeed
-                            //window.location.href =
-                              //  `index.php?page=order_success&payment=${payment_method}`;
+                            window.location.href =
+                               `index.php?page=order_success&payment=${payment_method}`;
                         },
                         error: function(err) {
                             console.error('updateCart failed:', err.responseText);

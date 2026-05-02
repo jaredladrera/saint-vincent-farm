@@ -7,13 +7,13 @@ require_once BASE_DIR . '/config/pdo_connection.php';
 require_once BASE_DIR . '/shared/helpers.php';
 
 
-function redirectRole($role, $fallback = 'contact') {
+function redirectRole($role, $fallback = 'shop') {
     $base = rtrim(dirname($_SERVER['SCRIPT_NAME']), '/\\');
         redirectByRole($role);
     exit;
 }
 
-$redirect = $_GET['redirect'] ?? 'contact';
+$redirect = $_GET['redirect'] ?? 'shop';
 $error    = '';
 
 // ── Handle login form POST ──
@@ -138,12 +138,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         </div>
                     </div>
 
-                    <div class="auth-remember">
+                    <!-- <div class="auth-remember">
                         <label class="auth-check-label">
                             <input type="checkbox" name="remember" />
                             <span>Remember me</span>
                         </label>
-                    </div>
+                    </div> -->
 
                     <button type="submit" class="auth-submit-btn">
                         <i class="bi bi-box-arrow-in-right"></i> Sign In
@@ -151,10 +151,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
                 </form>
 
-                <div class="auth-demo-hint">
+                <!-- <div class="auth-demo-hint">
                     <i class="bi bi-info-circle"></i>
                     Demo: <strong>juan@email.com</strong> / <strong>password123</strong>
-                </div>
+                </div> -->
 
                 <div class="auth-divider"><span>or</span></div>
 

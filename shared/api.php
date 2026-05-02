@@ -47,8 +47,9 @@ if(isset($_POST['key'])):
     if ($key === 'updateCartQty'):
         $cart_id  = $_POST['cart_id'];
         $quantity = $_POST['quantity'];
-        $stmt = $pdo->prepare("UPDATE cart SET quantity = ? WHERE id = ?");
-        $stmt->execute([$quantity, $cart_id]);
+        $amount   = $_POST['amount'];
+        $stmt = $pdo->prepare("UPDATE cart SET quantity = ?, amount = ? WHERE id = ?");
+        $stmt->execute([$quantity, $amount, $cart_id]);
         echo 'ok';
     endif;
 

@@ -47,10 +47,10 @@ function addToCart(id, user_id, price, quantity, btnEl) {
         data: { key: 'getCart', user_id: user_id },
         success: function(items) {
             const existing = items.find(function(i) { return parseInt(i.product_id) === parseInt(id); });
+
             if (existing) {
                 // Product already in cart — update quantity instead
                 const cid    = existing.cart_id || existing.id;
-
                 const newQty = parseInt(existing.cart_quantity) + parseInt(quantity);
                 $.ajax({
                     url: './shared/api.php',
@@ -64,8 +64,7 @@ function addToCart(id, user_id, price, quantity, btnEl) {
                     }
                 });
             } else {
-
-                //New product — insert into cart
+                // New product — insert into cart
                 $.ajax({
                     url: './shared/api.php',
                     method: 'POST',
@@ -179,48 +178,62 @@ function updateCartUI() {
 // ── RENDER CART ITEMS INTO DRAWER ──
 function renderCartUI(items) {
     const total     = items.reduce((sum, i) => sum + parseInt(i.cart_quantity), 0);
-    const badge     = document.getElementById('cartCount');
-    const container = document.getElementById('cartItems');
-    const empty     = document.getElementById('cartEmpty');
-    const footer    = document.getElementById('cartFooter');
+    const grandTotal = items.reduce((sum, i) => sum + parseFloat(i.price) * parseInt(i.cart_quantity), 0);
 
-    badge.textContent = total;
-    badge.classList.toggle('visible', total > 0);
+    // ── Badge ──
+    const badge = document.getElementById('cartCount');
+    if (badge) {
+        badge.textContent = total;
+        badge.classList.toggle('visible', total > 0);
+    }
+
+    // ── Total count text + hidden input ──
+    const totalCountEl = document.getElementById('cartTotalCount');
+    if (totalCountEl) {
+        totalCountEl.textContent = total + (total === 1 ? ' item' : ' items') + ' — ₱' + grandTotal.toFixed(2);
+    }
+    $('#hidden-total').val(grandTotal.toFixed(2));
+
+    // ── Footer ──
+    const footer = document.getElementById('cartFooter');
+    if (footer) footer.style.display = items.length === 0 ? 'none' : 'block';
+
+    // ── Empty state & items ──
+    const empty     = document.getElementById('cartEmpty');
+    const container = document.getElementById('cartItems');
+    if (!container) return;
 
     if (items.length === 0) {
-        empty.style.display  = 'flex';
-        footer.style.display = 'none';
-        container.innerHTML  = '';
-        container.appendChild(empty);
+        if (empty) empty.style.display = 'flex';
+        // Clear only cart item divs, leave #cartEmpty intact
+        Array.from(container.querySelectorAll('.cart-item')).forEach(function(el) { el.remove(); });
         return;
     }
 
-    empty.style.display  = 'none';
-    footer.style.display = 'block';
+    if (empty) empty.style.display = 'none';
 
-    container.innerHTML = items.map(function(item) {
-        const cid      = item.cart_id || item.id;   // use cart_id if API returns it, else id
+    // Build new HTML and replace only the cart-item divs
+    const html = items.map(function(item) {
+        const cid      = item.cart_id || item.id;
         const subtotal = (parseFloat(item.price) * parseInt(item.cart_quantity)).toFixed(2);
+
         return '<div class="cart-item" id="cart-item-' + cid + '">'
             + '<div class="cart-item-icon">' + (item.icon || '🛒') + '</div>'
             + '<div class="cart-item-info">'
             +   '<h6>' + item.name + '</h6>'
-            +   '<span>₱' + item.price +'</span> </br>  '
-            +   '<span>Quantity : ' + item.cart_quantity +'</span> </br>  '
+            +   '<span class="cart-item-price">₱' + parseFloat(item.price).toFixed(2) + ' / ' + (item.unit || 'pc') + '</span><br>'
+            +   '<span class="cart-item-qty-label">Qty: ' + item.cart_quantity + '</span><br>'
             +   '<span class="cart-item-subtotal">Subtotal: ₱' + subtotal + '</span>'
-            + '</div>'
-            + '<div class="cart-item-qty">'
             + '</div>'
             + '<button class="cart-item-remove" onclick="removeFromCart(' + cid + ')" title="Remove">'
             +   '<i class="bi bi-trash3"></i>'
             + '</button>'
-            + '</div>';
+            + '</div><br>'; // 👈 break between items
     }).join('');
 
-    const grandTotal = items.reduce((sum, i) => sum + parseFloat(i.price) * parseInt(i.cart_quantity), 0);
-    $('#hidden-total').val(grandTotal);
-    document.getElementById('cartTotalCount').textContent =
-        total + (total === 1 ? ' item' : ' items') + ' — ₱' + grandTotal.toFixed(2);
+    // Remove old cart-item divs first, then insert fresh ones before #cartEmpty
+    Array.from(container.querySelectorAll('.cart-item')).forEach(function(el) { el.remove(); });
+    container.insertAdjacentHTML('afterbegin', html);
 }
 
 

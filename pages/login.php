@@ -126,7 +126,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                     <div class="auth-field">
                         <label class="auth-label">
                             Password
-                            <a href="#" class="auth-forgot" tabindex="-1">Forgot password?</a>
+                            <a href="index.php?page=forgot_password" class="auth-forgot" tabindex="-1">Forgot password?</a>
                         </label>
                         <div class="auth-input-wrap">
                             <i class="bi bi-lock"></i>

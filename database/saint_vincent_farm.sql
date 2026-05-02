@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Apr 30, 2026 at 11:44 AM
+-- Generation Time: May 02, 2026 at 05:38 PM
 -- Server version: 8.0.34
 -- PHP Version: 8.0.30
 
@@ -36,6 +36,25 @@ CREATE TABLE `cart` (
   `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `cart` tinyint NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `cart`
+--
+
+INSERT INTO `cart` (`id`, `user_id`, `product_id`, `quantity`, `amount`, `created_at`, `cart`) VALUES
+(11, 16, 17, 2, 46, '2026-04-29 16:00:00', 0),
+(12, 16, 16, 1, 32, '2026-04-29 16:00:00', 0),
+(13, 16, 5, 1, 11, '2026-04-29 16:00:00', 0),
+(14, 16, 17, 2, 46, '2026-04-29 16:00:00', 0),
+(15, 16, 16, 1, 32, '2026-04-29 16:00:00', 0),
+(16, 16, 17, 3, 69, '2026-04-29 16:00:00', 0),
+(17, 16, 16, 1, 32, '2026-04-29 16:00:00', 0),
+(18, 16, 17, 2, 46, '2026-04-29 16:00:00', 0),
+(19, 16, 16, 1, 32, '2026-04-29 16:00:00', 0),
+(20, 16, 17, 2, 46, '2026-04-29 16:00:00', 0),
+(21, 16, 16, 1, 32, '2026-04-29 16:00:00', 0),
+(22, 16, 17, 1, 23, '2026-05-01 16:00:00', 0),
+(23, 16, 16, 1, 32, '2026-05-01 16:00:00', 0);
 
 -- --------------------------------------------------------
 
@@ -104,6 +123,13 @@ CREATE TABLE `orders` (
   `order_ids` varchar(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_general_ci DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
+--
+-- Dumping data for table `orders`
+--
+
+INSERT INTO `orders` (`id`, `user_id`, `order_status`, `total_amount`, `mode_of_payment`, `created_at`, `updated_at`, `notes`, `proof_of_payment`, `prefered_delivery_date`, `order_ids`) VALUES
+(46, 16, 'pending', 55.00, 'GCash', '2026-05-01 16:00:00', '2026-05-02 15:33:55', 'fdgfgdfg', 'assets/images/proof/proof_0_20260502_173355_c259ce.jpg', '2026-05-07', '16,17');
+
 -- --------------------------------------------------------
 
 --
@@ -113,10 +139,20 @@ CREATE TABLE `orders` (
 CREATE TABLE `order_items` (
   `id` int NOT NULL,
   `order_id` int NOT NULL,
-  `product_id` int NOT NULL,
+  `product_name` varchar(100) COLLATE utf8mb4_general_ci NOT NULL,
   `quantity` int NOT NULL,
   `price` decimal(10,2) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+--
+-- Dumping data for table `order_items`
+--
+
+INSERT INTO `order_items` (`id`, `order_id`, `product_name`, `quantity`, `price`) VALUES
+(14, 45, '32', 1, 32.00),
+(15, 45, '23', 3, 23.00),
+(16, 46, '23', 1, 23.00),
+(17, 46, '32', 1, 32.00);
 
 -- --------------------------------------------------------
 
@@ -181,9 +217,7 @@ ALTER TABLE `orders`
 -- Indexes for table `order_items`
 --
 ALTER TABLE `order_items`
-  ADD PRIMARY KEY (`id`),
-  ADD KEY `order_id` (`order_id`),
-  ADD KEY `product_id` (`product_id`);
+  ADD PRIMARY KEY (`id`);
 
 --
 -- Indexes for table `user_profile`
@@ -199,7 +233,7 @@ ALTER TABLE `user_profile`
 -- AUTO_INCREMENT for table `cart`
 --
 ALTER TABLE `cart`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=24;
 
 --
 -- AUTO_INCREMENT for table `category`
@@ -217,13 +251,13 @@ ALTER TABLE `livestock`
 -- AUTO_INCREMENT for table `orders`
 --
 ALTER TABLE `orders`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=29;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=47;
 
 --
 -- AUTO_INCREMENT for table `order_items`
 --
 ALTER TABLE `order_items`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=18;
 
 --
 -- AUTO_INCREMENT for table `user_profile`
@@ -247,13 +281,6 @@ ALTER TABLE `cart`
 --
 ALTER TABLE `orders`
   ADD CONSTRAINT `orders_ibfk_1` FOREIGN KEY (`user_id`) REFERENCES `user_profile` (`id`);
-
---
--- Constraints for table `order_items`
---
-ALTER TABLE `order_items`
-  ADD CONSTRAINT `order_items_ibfk_1` FOREIGN KEY (`order_id`) REFERENCES `orders` (`id`),
-  ADD CONSTRAINT `order_items_ibfk_2` FOREIGN KEY (`product_id`) REFERENCES `livestock` (`id`);
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;

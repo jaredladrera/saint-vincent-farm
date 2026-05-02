@@ -20,14 +20,14 @@ if ($page === 'logout') {
 }
 
 $allowed_pages = [
-    'home', 'shop', 'features', 'about', 'contact', 'profile', 'my_order',
+    'home', 'shop', 'features', 'about', 'contact', 'profile', 'my_order', 'forgot_password',
     'login', 'register', 'order_request_form', 'upload_proof', 'order_success',
     'account/admin', 'account/staff',
 ];
 if (!in_array($page, $allowed_pages)) $page = 'home';
 
 // ── Public pages (no login required) ──
-$public_pages = ['home', 'shop', 'features', 'about', 'contact', 'login', 'register'];
+$public_pages = ['home', 'shop', 'features', 'about', 'contact', 'login', 'register', 'forgot_password'];
 
 // ── Redirect logged-in users away from login/register ──
 if (in_array($page, ['login', 'register']) && isLoggedIn()) {
@@ -79,6 +79,7 @@ $auth_pages = ['login', 'register'];
     elseif  ($page == 'contact')  { require BASE_DIR . '/pages/contact.php'; }
     elseif  ($page == 'login')    { require BASE_DIR . '/pages/login.php'; }
     elseif  ($page == 'register') { require BASE_DIR . '/pages/register.php'; }
+    elseif  ($page == 'forgot_password') { require BASE_DIR . '/pages/forgot_password.php'; }
     elseif  ($page == 'upload_proof') { require BASE_DIR . '/pages/upload_proof.php'; }
     elseif  ($page == 'order_success') { require BASE_DIR . '/pages/order_success.php'; }
     elseif  ($page == 'my_order') { require BASE_DIR . '/pages/my_order.php'; }

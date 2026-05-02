@@ -32,6 +32,7 @@ if(isset($_POST['key'])):
                 c.id, 
                 c.quantity AS cart_quantity, 
                 c.amount, 
+                c.product_id,
                 p.name, 
                 p.price, 
                 p.quantity AS stock_quantity

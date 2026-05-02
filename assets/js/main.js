@@ -39,26 +39,59 @@ function addToCart(id, user_id, price, quantity, btnEl) {
         return;
     }
 
+    // Check if product already exists in the cart
     $.ajax({
         url: './shared/api.php',
         method: 'POST',
-        dataType: 'text',
-        data: {
-            key: 'addToCart',
-            product_id: id,
-            user_id: user_id,
-            quantity: quantity,
-            amount: parseInt(price) * parseFloat(quantity)
+        dataType: 'json',
+        data: { key: 'getCart', user_id: user_id },
+        success: function(items) {
+            const existing = items.find(function(i) { return parseInt(i.product_id) === parseInt(id); });
+            if (existing) {
+                // Product already in cart — update quantity instead
+                const cid    = existing.cart_id || existing.id;
+
+                const newQty = parseInt(existing.cart_quantity) + parseInt(quantity);
+                $.ajax({
+                    url: './shared/api.php',
+                    method: 'POST',
+                    data: { key: 'updateCartQty', cart_id: cid, quantity: newQty },
+                    success: function() {
+                        updateCartUI();
+                        animateCartBtn();
+                        btnFeedback(btnEl);
+                        showToast('Cart updated!');
+                    }
+                });
+            } else {
+
+                //New product — insert into cart
+                $.ajax({
+                    url: './shared/api.php',
+                    method: 'POST',
+                    dataType: 'text',
+                    data: {
+                        key: 'addToCart',
+                        product_id: id,
+                        user_id: user_id,
+                        quantity: quantity,
+                        amount: parseInt(price) * parseFloat(quantity)
+                    },
+                    success: function() {
+                        updateCartUI();
+                        animateCartBtn();
+                        btnFeedback(btnEl);
+                        showToast('Item added to cart!');
+                    },
+                    error: function(xhr) {
+                        console.error('Add to cart failed:', xhr.responseText);
+                        alert('Failed to add item to cart.');
+                    }
+                });
+            }
         },
-        success: function(response) {
-            updateCartUI();      // ← inside success, runs AFTER insert is done
-            animateCartBtn();
-            btnFeedback(btnEl);
-            showToast('Item added to cart!');
-        },
-        error: function(xhr) {
-            console.error('Add to cart failed:', xhr.responseText);
-            alert('Failed to add item to cart.');
+        error: function() {
+            alert('Failed to check cart. Please try again.');
         }
     });
 }
@@ -101,12 +134,19 @@ function changeQty(cartId, currentQty, delta, maxStock) {
 }
 // ── REMOVE ITEM ──
 function removeFromCart(cartId) {
+    // Optimistically hide the item immediately so UI feels instant
+    const el = document.getElementById('cart-item-' + cartId);
+    if (el) el.remove();
+
     $.ajax({
         url: './shared/api.php',
         method: 'POST',
         data: { key: 'removeFromCart', cart_id: cartId },
         success: function() {
-            updateCartUI(); // re-fetch from DB
+            updateCartUI(); // re-fetch from DB to sync badge & total
+        },
+        error: function() {
+            updateCartUI(); // restore correct state on failure
         }
     });
 }
@@ -159,8 +199,9 @@ function renderCartUI(items) {
     footer.style.display = 'block';
 
     container.innerHTML = items.map(function(item) {
+        const cid      = item.cart_id || item.id;   // use cart_id if API returns it, else id
         const subtotal = (parseFloat(item.price) * parseInt(item.cart_quantity)).toFixed(2);
-        return '<div class="cart-item" id="cart-item-' + item.id + '">'
+        return '<div class="cart-item" id="cart-item-' + cid + '">'
             + '<div class="cart-item-icon">' + (item.icon || '🛒') + '</div>'
             + '<div class="cart-item-info">'
             +   '<h6>' + item.name + '</h6>'
@@ -169,11 +210,8 @@ function renderCartUI(items) {
             +   '<span class="cart-item-subtotal">Subtotal: ₱' + subtotal + '</span>'
             + '</div>'
             + '<div class="cart-item-qty">'
-            // +   '<button class="qty-btn" onclick="changeQty(' + item.id + ', ' + item.quantity + ', -1, ' + item.stock + ')">&#8722;</button>'
-            // +   '<span class="qty-num">' + item.quantity + '</span>'
-            // +   '<button class="qty-btn" onclick="changeQty(' + item.id + ', ' + item.quantity + ', +1, ' + item.stock + ')">+</button>'
             + '</div>'
-            + '<button class="cart-item-remove" onclick="removeFromCart(' + item.id + ')" title="Remove">'
+            + '<button class="cart-item-remove" onclick="removeFromCart(' + cid + ')" title="Remove">'
             +   '<i class="bi bi-trash3"></i>'
             + '</button>'
             + '</div>';
@@ -184,8 +222,6 @@ function renderCartUI(items) {
     document.getElementById('cartTotalCount').textContent =
         total + (total === 1 ? ' item' : ' items') + ' — ₱' + grandTotal.toFixed(2);
 }
-
-
 
 
 // ── ANIMATE BADGE BUMP ──

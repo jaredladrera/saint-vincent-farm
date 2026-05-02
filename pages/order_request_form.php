@@ -376,7 +376,7 @@ function confirm_order(user_id, grandTotal, product_ids) {
                     $.ajax({
                         url: './shared/api.php',
                         method: 'POST',
-                        dataType: 'json',
+                        dataType: 'text',
                         data: {
                             key: 'updateCart',
                             user_id: user_id,
@@ -389,6 +389,7 @@ function confirm_order(user_id, grandTotal, product_ids) {
                                `index.php?page=order_success&payment=${payment_method}`;
                         },
                         error: function(err) {
+                            console.log("err", err);
                             console.error('updateCart failed:', err.responseText);
                         }
                     });

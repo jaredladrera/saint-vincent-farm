@@ -149,6 +149,73 @@ if(isset($_POST['key'])):
 
     endif;
 
+
+    if ($key === 'insertCartBulk'):
+
+        $order_id = $_POST['order_id'] ?? null;
+        $cart_data = $_POST['cart_data'] ?? '[]';
+
+        if (!$order_id) {
+            echo json_encode([
+                'status' => false,
+                'message' => 'Missing order_id'
+            ]);
+            exit;
+        }
+
+        // Decode JSON
+        $cartItems = json_decode($cart_data, true);
+
+        if (!is_array($cartItems) || empty($cartItems)) {
+            echo json_encode([
+                'status' => false,
+                'message' => 'Invalid cart data'
+            ]);
+            exit;
+        }
+
+        try {
+            $pdo->beginTransaction();
+
+            // Prepare insert
+            $stmt = $pdo->prepare("
+                INSERT INTO order_items (order_id, product_name, quantity, price)
+                VALUES (?, ?, ?, ?)
+            ");
+
+            foreach ($cartItems as $item) {
+
+                // ⚠️ Adjust keys depending on your cart structure
+                $product_name = $item['livestock_name'];     // better if this is ID
+                $quantity   = $item['cart_quantity'];
+                $price      = $item['livestock_price'];
+
+                $stmt->execute([
+                    $order_id,
+                    $product_name,
+                    $quantity,
+                    $price
+                ]);
+            }
+
+            $pdo->commit();
+
+            echo json_encode([
+                'status' => true,
+                'message' => 'Bulk insert successful'
+            ]);
+
+        } catch (Exception $e) {
+            $pdo->rollBack();
+
+            echo json_encode([
+                'status' => false,
+                'message' => $e->getMessage()
+            ]);
+        }
+
+    endif;
+
 endif;
  
 ?>

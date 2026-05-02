@@ -1,23 +1,85 @@
 <?php
 // ══ UPLOAD PROOF OF PAYMENT PAGE ══
-$order_id       = $_GET['inserted_id'] ?? '';
+
+// 🔥 FIX: DB CONNECTION (IMPORTANT)
+$db = new Connect();
+$pdo = $db->connection;
+
+
+$order_id = isset($_GET['inserted_id']) ? $_GET['inserted_id'] : 0;
 $full_name      = currentUser() ?? '';
 $payment_method = $_GET['payment_mode'] ?? '';
 
+
 $qr_map = [
-    'GCash'         => ['img' => 'assets/images/qr/gcash_qr.jpeg',  'label' => 'GCash',        'name' => 'St. Vincent Farm', 'account' => '09XX XXX XXXX'],
-    'Bank Transfer' => ['img' => 'assets/images/qr/bank_qr.png',   'label' => 'Bank Transfer', 'name' => 'St. Vincent Farm', 'account' => 'Acct No: XXXX-XXXX-XXXX'],
+    'GCash' => [
+        'img' => 'assets/images/qr/gcash_qr.jpeg',
+        'label' => 'GCash',
+        'name' => 'St. Vincent Farm',
+        'account' => '09XX XXX XXXX'
+    ],
+    'Bank Transfer' => [
+        'img' => 'assets/images/qr/bank_qr.png',
+        'label' => 'Bank Transfer',
+        'name' => 'St. Vincent Farm',
+        'account' => 'Acct No: XXXX-XXXX-XXXX'
+    ],
 ];
+
 $qr = $qr_map[$payment_method] ?? null;
 
 
-function uploadPaymentProof(array $file, string $order_id): array {
+// ══ GET CART ITEMS ═════════════════════════════════════
+$getMyCart = $pdo->prepare("
+    SELECT 
+        c.id AS cart_id,
+        c.user_id AS cart_user_id,
+        c.product_id AS cart_product_id,
+        c.quantity AS cart_quantity,
+        c.amount AS cart_amount,
+
+        l.id AS livestock_id,
+        l.price AS livestock_price,
+        l.name AS livestock_name
+
+    FROM cart AS c
+    INNER JOIN livestock AS l 
+        ON c.product_id = l.id
+    WHERE c.user_id = ? AND c.cart = 1
+");
+
+$getMyCart->execute([$user['id']]);
+$cartItems = $getMyCart->fetchAll(PDO::FETCH_ASSOC);
 
 
-    $id = $_POST["order_id"];
-    $payment_method = $_POST["payment_method"];
+// ══ INSERT ORDER ITEMS ═══════════════════════════════════
+function insertOrderItems($pdo, $order_id, $cartItems) {
 
-    // ── Validate file ─────────────────────────────────────────────────────────
+    $or_id = $_POST['order_id'];
+    if (empty($cartItems)) return;
+
+    $stmt = $pdo->prepare("
+        INSERT INTO order_items (order_id, product_name, quantity, price)
+        VALUES (?, ?, ?, ?)
+    ");
+
+    foreach ($cartItems as $item) {
+        $stmt->execute([
+            $or_id,
+            $item['livestock_name'],
+            $item['cart_quantity'],
+            $item['livestock_price']
+        ]);
+    }
+}
+
+
+// ══ UPLOAD FUNCTION ═════════════════════════════════════
+function uploadPaymentProof(array $file, string $order_id, $pdo, $cartItems): array {
+
+    $id = $order_id;
+
+    // ── Validate file ─────────────────────────────
     if ($file['error'] !== UPLOAD_ERR_OK) {
         return ['success' => false, 'message' => 'Upload error occurred.'];
     }
@@ -26,83 +88,104 @@ function uploadPaymentProof(array $file, string $order_id): array {
         return ['success' => false, 'message' => 'File too large. Max 5MB.'];
     }
 
-    $allowed_mime = ['image/jpeg' => 'jpg', 'image/png' => 'png', 'image/webp' => 'webp'];
-    $mime         = (new finfo(FILEINFO_MIME_TYPE))->file($file['tmp_name']);
+    $allowed_mime = [
+        'image/jpeg' => 'jpg',
+        'image/png'  => 'png',
+        'image/webp' => 'webp'
+    ];
+
+    $mime = (new finfo(FILEINFO_MIME_TYPE))
+        ->file($file['tmp_name']);
 
     if (!isset($allowed_mime[$mime])) {
-        return ['success' => false, 'message' => 'Invalid file type. Only JPG, PNG, WEBP allowed.'];
+        return ['success' => false, 'message' => 'Invalid file type.'];
     }
 
-    // ── Build unique filename ─────────────────────────────────────────────────
-    // Format: proof_<order_id>_<Ymd_His>_<random6hex>.ext
-    $ext      = $allowed_mime[$mime];
-    $filename = sprintf('proof_%s_%s_%s.%s',
+    // ── File name ────────────────────────────────
+    $ext = $allowed_mime[$mime];
+
+    $filename = sprintf(
+        'proof_%s_%s_%s.%s',
         preg_replace('/[^a-zA-Z0-9_-]/', '', $id),
         date('Ymd_His'),
         bin2hex(random_bytes(3)),
         $ext
     );
 
-    // ── Move to folder ────────────────────────────────────────────────────────
     $upload_dir = __DIR__ . './../assets/images/proof/';
 
-    
     if (!is_dir($upload_dir)) {
         mkdir($upload_dir, 0755, true);
-        }
-        
-        if (!move_uploaded_file($file['tmp_name'], $upload_dir . $filename)) {
-            return ['success' => false, 'message' => 'Failed to save file.'];
-        } 
+    }
 
-        // echo "order id". $id;
-        // echo "filename". $filename;
+    if (!move_uploaded_file($file['tmp_name'], $upload_dir . $filename)) {
+        return ['success' => false, 'message' => 'Failed to save file.'];
+    }
 
-    // ── Save to database ──────────────────────────────────────────────────────
+    // ── DB TRANSACTION ───────────────────────────
     try {
-        $db   = new Connect(); 
-        $stmt = $db->connection->prepare("
+
+        // 1. update order proof
+        $stmt = $pdo->prepare("
             UPDATE orders
             SET proof_of_payment = :proof
             WHERE id = :order_id
         ");
+
         $stmt->execute([
-            ':proof'    => 'assets/images/proof/' . $filename,
-            ':order_id' => $id,
+            ':proof' => 'assets/images/proof/' . $filename,
+            ':order_id' => $_POST['order_id'],
         ]);
 
+        // 2. insert order items
+        insertOrderItems($pdo, $id, $cartItems);
+
+        // 3. CLEAR CART (FIXED HERE)
+        $stmt = $pdo->prepare("
+            UPDATE cart 
+            SET cart = 0 
+            WHERE user_id = ?
+        ");
+
+        $stmt->execute([$GLOBALS['user']['id']]);
 
     } catch (PDOException $e) {
-        @unlink($upload_dir . $filename); // remove file if DB fails
-            return [
-                'success' => false,
-                'message' => 'Database error: ' . $e->getMessage()
-            ];
+
+        @unlink($upload_dir . $filename);
+
+        return [
+            'success' => false,
+            'message' => 'Database error: ' . $e->getMessage()
+        ];
     }
 
-    return ['success' => true, 'file' => $filename];
+    return [
+        'success' => true,
+        'file' => $filename
+    ];
 }
 
-// ── Run ───────────────────────────────────────────────────────────────────────
+
+// ══ RUN UPLOAD ════════════════════════════════════════
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+
     $result = uploadPaymentProof(
         $_FILES['payment_proof'] ?? [],
-        $order_id
+        $order_id,
+        $pdo,
+        $cartItems
     );
-
 
     if ($result['success']) {
         header("Location: index.php?page=order_success&payment=" . urlencode($payment_method));
         exit;
     }
 
-
     echo json_encode($result);
     exit;
 }
 
 ?>
-
 <div class="page-hero">
     <div class="container">
         <div class="section-label">Payment</div>
@@ -154,7 +237,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         </span>
                     </div>
                     <?php endif; ?>
-
+                    <!-- form here -->
                     <form id="proofForm" action="index.php?page=upload_proof" method="POST" enctype="multipart/form-data">
     
                         <?php if ($order_id): ?>

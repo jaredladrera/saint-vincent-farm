@@ -186,77 +186,7 @@ function renderCartUI(items) {
 }
 
 
-//confirm order 
-function confirm_order(user_id, grandTotal, product_ids) {
-    const payment_method = $("#payment_method").val();
-    const prefered_delivery_date = $("#prefered_delivery_date").val();
-    const notes = $("#note").val();
-    // const prefered_delivery_date = $("#prefered_delivery_date").val();
 
-    // alert([...product_ids])
-    const idArray = product_ids.split(',').map(Number);
-
-    if(!prefered_delivery_date){
-        alert("Need prefered date to fill up");
-        return;
-    }
-
-    $.ajax({
-        url: './shared/api.php',
-        method: 'POST',
-        dataType: 'text',
-        data: {
-            key: 'checkout',
-            user_id,
-            order_status: 'pending',
-            total_amount: grandTotal,
-            mode_of_payment: payment_method,
-            notes: notes ? notes : 'no notes',
-            prefered_delivery_date,
-            order_ids: product_ids
-        },
-        success: function(response) {
-
-            // console.log("response", response);
-            // header
-            if(response) {
-                if(payment_method === 'GCash' || payment_method === 'Bank Transfer') {
-                    // window.location.href = `page.php?upload=${user_id}&status=${status}`;
-                    window.location.href = `index.php?page=upload_proof&total=${grandTotal}&payment_mode=${payment_method}&inserted_id=${response}`;
-                } else {
-                    // console.log("product_ids", product_ids);
-                    $.ajax({
-                        url: './shared/api.php',
-                        method: 'POST',
-                        dataType: 'text',
-                        data: {
-                            key: 'updateCart',
-                            user_id,
-                            order_ids: product_ids
-                        },
-                        success: (res) => {
-                                window.location.href =
-                                    `index.php?page=order_success&payment=${payment_method}`;
-                            
-                        },
-                        error: (er) => {
-                            console.error('Checkout failed:', er.responseText);
-                        }
-                    });
-                    // alert("hello");
-                    //update the cart / remove to the cart
-
-                }
-            } else {
-                alert("Issue on checking out order");
-            }
-        },
-        error: function(xhr) {
-            console.error('Checkout failed:', xhr.responseText);
-        }
-    })
-
-}
 
 // ── ANIMATE BADGE BUMP ──
 function animateCartBtn() {

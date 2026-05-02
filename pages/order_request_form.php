@@ -7,6 +7,7 @@ $payment_options = [
     'Cash on Pickup',
 ];
 
+$g_order_total = $_GET["grandtotal"];
 
 // Cart total from session
 $cart_items   = $_SESSION['cart']         ?? [];
@@ -164,12 +165,12 @@ $jsonCart = json_encode($myCart);
                                 <i class="bi bi-receipt"></i> Order Total
                             </span>
                             <span style="font-size:1.25rem;font-weight:800;color:var(--amber);">
-                                ₱<?= number_format($grand_total, 2) ?>
+                                ₱<?= number_format($g_order_total, 2) ?>
                             </span>
                         </div>
                         <input type="hidden" name="total_amount" value="<?= $cart_total ?>">
                         <?php if($grand_total > 0): ?>
-                            <button type="submit" class="btn-submit" onclick="confirm_order(<?= $user['id']; ?>, <?= $grand_total; ?>, '<?= $product_ids; ?>' )">
+                            <button type="submit" class="btn-submit" onclick="confirm_order(<?= $user['id']; ?>, <?= $g_order_total; ?>, '<?= $product_ids; ?>' )">
                                 <i class="bi bi-bag-check"></i> Confirm Order
                             </button>
                         <?php endif; ?>

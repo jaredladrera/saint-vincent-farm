@@ -197,6 +197,12 @@ function renderCartUI(items) {
     }
     $('#hidden-total').val(grandTotal.toFixed(2));
 
+    // Keep checkout link in sync
+    const checkoutBtn = document.getElementById('checkoutBtn');
+    if (checkoutBtn) {
+        checkoutBtn.href = 'index.php?page=order_request_form&grandtotal=' + encodeURIComponent(grandTotal.toFixed(2));
+    }
+
     // ── Footer ──
     const footer = document.getElementById('cartFooter');
     if (footer) footer.style.display = items.length === 0 ? 'none' : 'block';

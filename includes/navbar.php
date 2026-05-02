@@ -92,7 +92,7 @@ $user = currentUser();
             <strong id="cartTotalCount">0</strong>
         </div>
         <?php if ($user): ?>
-            <a href="index.php?page=order_request_form&grandtotal=" class="cart-checkout-btn" onclick="toggleCartDrawer()">
+            <a href="index.php?page=order_request_form&grandtotal=" class="cart-checkout-btn" id="checkoutBtn" onclick="toggleCartDrawer()">
                 <i class="bi bi-bag-check"></i> Proceed to Order
             </a>
         <?php else: ?>

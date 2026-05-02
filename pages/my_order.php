@@ -23,10 +23,38 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['cancel_order'])) {
     }
 }
 
-// Fetch all orders
-$stmt = $pdo->prepare("SELECT * FROM orders WHERE user_id = ? ORDER BY created_at DESC");
+// Fetch all orders with their items
+$stmt = $pdo->prepare("
+    SELECT o.*,
+           oi.id           AS item_id,
+           oi.product_name AS item_product_name,
+           oi.quantity     AS item_quantity,
+           oi.price        AS item_price
+    FROM orders o
+    LEFT JOIN order_items oi ON oi.order_id = o.id
+    WHERE o.user_id = ?
+    ORDER BY o.created_at DESC, oi.id ASC
+");
 $stmt->execute([$user['id']]);
-$orders = $stmt->fetchAll();
+$rows = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+// Group rows by order id, collecting items into an array
+$orders_map = [];
+foreach ($rows as $row) {
+    $oid = $row['id'];
+    if (!isset($orders_map[$oid])) {
+        $orders_map[$oid] = $row;
+        $orders_map[$oid]['items'] = [];
+    }
+    if ($row['item_id']) {
+        $orders_map[$oid]['items'][] = [
+            'product_name' => $row['item_product_name'],
+            'quantity'     => $row['item_quantity'],
+            'price'        => $row['item_price'],
+        ];
+    }
+}
+$orders = array_values($orders_map);
 
 // Status config — keyed by order_status values
 $status_map = [
@@ -99,14 +127,14 @@ $step_order = array_column($track_steps, 'key');
                     </thead>
                     <tbody>
                         <?php foreach ($orders as $order):
-                            $st         = $status_map[$order->order_status] ?? ['class' => 'status-default', 'icon' => 'bi-circle', 'label' => ucwords(str_replace('_', ' ', $order->order_status))];
-                            $can_cancel = ($order->order_status === 'pending');
+                            $st         = $status_map[$order['order_status']] ?? ['class' => 'status-default', 'icon' => 'bi-circle', 'label' => ucwords(str_replace('_', ' ', $order['order_status']))];
+                            $can_cancel = ($order['order_status'] === 'pending');
                         ?>
                         <tr>
-                            <td class="orders-id">#<?= htmlspecialchars($order->id) ?></td>
-                            <td class="orders-date"><?= date('M d, Y', strtotime($order->created_at)) ?></td>
-                            <td class="orders-method"><?= htmlspecialchars($order->mode_of_payment ?? 'N/A') ?></td>
-                            <td class="orders-amount">₱<?= number_format($order->total_amount ?? 0, 2) ?></td>
+                            <td class="orders-id">#<?= htmlspecialchars($order['id']) ?></td>
+                            <td class="orders-date"><?= date('M d, Y', strtotime($order['created_at'])) ?></td>
+                            <td class="orders-method"><?= htmlspecialchars($order['mode_of_payment'] ?? 'N/A') ?></td>
+                            <td class="orders-amount">₱<?= number_format($order['total_amount'] ?? 0, 2) ?></td>
                             <td>
                                 <span class="profile-status-badge <?= $st['class'] ?>">
                                     <i class="bi <?= $st['icon'] ?>"></i> <?= $st['label'] ?>
@@ -119,9 +147,9 @@ $step_order = array_column($track_steps, 'key');
                                 </button>
                                 <?php if ($can_cancel): ?>
                                 <form method="POST" class="orders-cancel-form"
-                                      onsubmit="return confirmCancel(event, <?= $order->id ?>)">
+                                      onsubmit="return confirmCancel(event, <?= $order['id'] ?>)">
                                     <input type="hidden" name="cancel_order" value="1">
-                                    <input type="hidden" name="order_id" value="<?= $order->id ?>">
+                                    <input type="hidden" name="order_id" value="<?= $order['id'] ?>">
                                     <button type="submit" class="orders-btn-cancel">
                                         <i class="bi bi-x-circle"></i> Cancel
                                     </button>
@@ -204,6 +232,25 @@ $step_order = array_column($track_steps, 'key');
             </div>
         </div>
 
+        <!-- Order Items -->
+        <div class="orders-modal-items">
+            <div class="orders-modal-items-title"><i class="bi bi-bag"></i> Order Items</div>
+            <table class="orders-items-table" id="modal-items-table">
+                <thead>
+                    <tr>
+                        <th>Product</th>
+                        <th>Qty</th>
+                        <th>Price</th>
+                        <th>Subtotal</th>
+                    </tr>
+                </thead>
+                <tbody id="modal-items-body"></tbody>
+            </table>
+            <div id="modal-items-empty" style="display:none;text-align:center;padding:12px;color:#888;font-size:0.875rem;">
+                No items found for this order.
+            </div>
+        </div>
+
         <!-- Cancel button inside modal — only visible when order_status = 'pending' -->
         <div id="modal-cancel-wrap" style="display:none;">
             <form method="POST" onsubmit="return confirmCancel(event, window._modalOrderId)">
@@ -275,6 +322,31 @@ function openOrderDetails(order) {
     }
 
     document.getElementById('orderDetailsModal').classList.add('show');
+
+    // ── Render order items from the already-loaded data ──
+    const itemsBody  = document.getElementById('modal-items-body');
+    const itemsTable = document.getElementById('modal-items-table');
+    const itemsEmpty = document.getElementById('modal-items-empty');
+    itemsBody.innerHTML = '';
+
+    const items = order.items || [];
+    if (items.length === 0) {
+        itemsTable.style.display = 'none';
+        itemsEmpty.style.display = 'block';
+    } else {
+        itemsEmpty.style.display = 'none';
+        itemsTable.style.display = 'table';
+        items.forEach(function(item) {
+            var subtotal = parseFloat(item.price || 0) * parseInt(item.quantity || 0);
+            var tr = document.createElement('tr');
+            tr.innerHTML =
+                '<td class="oi-name">'  + escapeHtml(item.product_name) + '</td>' +
+                '<td class="oi-qty">'   + parseInt(item.quantity) + '</td>' +
+                '<td class="oi-price">₱' + parseFloat(item.price).toLocaleString('en-PH', {minimumFractionDigits:2}) + '</td>' +
+                '<td class="oi-sub">₱'  + subtotal.toLocaleString('en-PH', {minimumFractionDigits:2}) + '</td>';
+            itemsBody.appendChild(tr);
+        });
+    }
 }
 
 function closeOrderDetails() {
@@ -297,4 +369,9 @@ function confirmCancel(e, orderId) {
 document.getElementById('orderDetailsModal').addEventListener('click', function(e) {
     if (e.target === this) closeOrderDetails();
 });
+
+function escapeHtml(str) {
+    return String(str).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
 </script>
+

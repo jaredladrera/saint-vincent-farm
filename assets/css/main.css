@@ -2025,3 +2025,48 @@ footer.main-footer strong { color: rgba(255,255,255,0.8); }
     .fp-otp-input { width: 40px; height: 46px; font-size: 1.1rem; }
     .fp-otp-row   { gap: 7px; }
 }
+
+//order modal items
+
+.orders-modal-items {
+    margin: 18px 0 10px;
+    border-top: 1px solid #e4ede4;
+    padding-top: 14px;
+}
+.orders-modal-items-title {
+    font-weight: 700;
+    font-size: 0.9rem;
+    color: #1a3a1e;
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+.orders-items-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.83rem;
+}
+.orders-items-table thead tr {
+    background: #f0f7f0;
+}
+.orders-items-table th {
+    padding: 7px 10px;
+    text-align: left;
+    font-weight: 600;
+    color: #1a3a1e;
+    border-bottom: 2px solid #c8e6c9;
+    white-space: nowrap;
+}
+.orders-items-table td {
+    padding: 7px 10px;
+    border-bottom: 1px solid #edf4ee;
+    color: #333;
+    vertical-align: middle;
+}
+.orders-items-table tbody tr:last-child td { border-bottom: none; }
+.orders-items-table tbody tr:hover { background: #f9fcf9; }
+.oi-name  { font-weight: 500; }
+.oi-qty   { text-align: center; color: #555; }
+.oi-price { text-align: right; color: #555; }
+.oi-sub   { text-align: right; font-weight: 600; color: #1a3a1e; }

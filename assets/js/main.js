@@ -50,12 +50,13 @@ function addToCart(id, user_id, price, quantity, btnEl) {
 
             if (existing) {
                 // Product already in cart — update quantity instead
-                const cid    = existing.cart_id || existing.id;
-                const newQty = parseInt(existing.cart_quantity) + parseInt(quantity);
+                const cid      = existing.cart_id || existing.id;
+                const newQty   = parseInt(existing.cart_quantity) + parseInt(quantity);
+                const newAmount = (newQty * parseFloat(price)).toFixed(2);
                 $.ajax({
                     url: './shared/api.php',
                     method: 'POST',
-                    data: { key: 'updateCartQty', cart_id: cid, quantity: newQty },
+                    data: { key: 'updateCartQty', cart_id: cid, quantity: newQty, amount: newAmount },
                     success: function() {
                         updateCartUI();
                         animateCartBtn();
@@ -117,17 +118,19 @@ function addToCartFromModal() {
 }
 
 // ── CHANGE ITEM QUANTITY ──
-function changeQty(cartId, currentQty, delta, maxStock) {
+function changeQty(cartId, currentQty, delta, maxStock, price) {
     let newQty = parseInt(currentQty) + delta;
     if (newQty < 1)        newQty = 1;
     if (newQty > maxStock) newQty = maxStock;
 
+    const newAmount = (newQty * parseFloat(price)).toFixed(2);
+
     $.ajax({
         url: './shared/api.php',
         method: 'POST',
-        data: { key: 'updateCartQty', cart_id: cartId, quantity: newQty },
+        data: { key: 'updateCartQty', cart_id: cartId, quantity: newQty, amount: newAmount },
         success: function() {
-            updateCartUI(); // re-fetch from DB
+            updateCartUI(); // re-fetch from DB — badge, subtotals & grand total all update
         }
     });
 }
@@ -215,20 +218,26 @@ function renderCartUI(items) {
     // Build new HTML and replace only the cart-item divs
     const html = items.map(function(item) {
         const cid      = item.cart_id || item.id;
-        const subtotal = (parseFloat(item.price) * parseInt(item.cart_quantity)).toFixed(2);
-
+        const qty      = parseInt(item.cart_quantity);
+        const price    = parseFloat(item.price);
+        const stock    = parseInt(item.stock) || 999;
+        const subtotal = (price * qty).toFixed(2);
         return '<div class="cart-item" id="cart-item-' + cid + '">'
             + '<div class="cart-item-icon">' + (item.icon || '🛒') + '</div>'
             + '<div class="cart-item-info">'
             +   '<h6>' + item.name + '</h6>'
-            +   '<span class="cart-item-price">₱' + parseFloat(item.price).toFixed(2) + ' / ' + (item.unit || 'pc') + '</span><br>'
-            +   '<span class="cart-item-qty-label">Qty: ' + item.cart_quantity + '</span><br>'
+            +   '<span class="cart-item-price">₱' + price.toFixed(2) + ' / ' + (item.unit || 'pc') + '</span>'
+            +   '<div class="cart-item-stepper">'
+            +     '<button class="qty-btn" onclick="changeQty(' + cid + ',' + qty + ',-1,' + stock + ',' + price + ')">&#8722;</button>'
+            +     '<span class="qty-num">' + qty + '</span>'
+            +     '<button class="qty-btn" onclick="changeQty(' + cid + ',' + qty + ',1,' + stock + ',' + price + ')">+</button>'
+            +   '</div>'
             +   '<span class="cart-item-subtotal">Subtotal: ₱' + subtotal + '</span>'
             + '</div>'
             + '<button class="cart-item-remove" onclick="removeFromCart(' + cid + ')" title="Remove">'
             +   '<i class="bi bi-trash3"></i>'
             + '</button>'
-            + '</div><br>'; // 👈 break between items
+            + '</div>';
     }).join('');
 
     // Remove old cart-item divs first, then insert fresh ones before #cartEmpty

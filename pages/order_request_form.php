@@ -320,7 +320,7 @@ $jsonCart = json_encode($myCart);
 // }
 
 const cartDataTest = <?= $jsonCart ?>;
-console.log(cartDataTest)
+                            
 function confirm_order(user_id, grandTotal, product_ids) {
     const cartData = <?= $jsonCart ?>;
     const payment_method = $("#payment_method").val();

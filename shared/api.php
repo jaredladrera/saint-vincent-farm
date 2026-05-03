@@ -185,12 +185,17 @@ if(isset($_POST['key'])):
                 VALUES (?, ?, ?, ?)
             ");
 
+            $deductStock = $pdo->prepare("
+                UPDATE livestock SET quantity = quantity - ? WHERE id = ? AND quantity >= ?
+            ");
+
             foreach ($cartItems as $item) {
 
                 // ⚠️ Adjust keys depending on your cart structure
-                $product_name = $item['livestock_name'];     // better if this is ID
-                $quantity   = $item['cart_quantity'];
-                $price      = $item['livestock_price'];
+                $product_name = $item['livestock_name'];
+                $quantity     = $item['cart_quantity'];
+                $price        = $item['livestock_price'];
+                $product_id   = $item['livestock_id'];
 
                 $stmt->execute([
                     $order_id,
@@ -198,6 +203,9 @@ if(isset($_POST['key'])):
                     $quantity,
                     $price
                 ]);
+
+                // Deduct stock — only if enough stock exists (quantity >= ordered qty)
+                $deductStock->execute([$quantity, $product_id, $quantity]);
             }
 
             $pdo->commit();

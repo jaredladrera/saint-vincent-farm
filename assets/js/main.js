@@ -226,13 +226,13 @@ function renderCartUI(items) {
         const cid      = item.cart_id || item.id;
         const qty      = parseInt(item.cart_quantity);
         const price    = parseFloat(item.price);
-        const stock    = parseInt(item.stock) || 999;
+        const stock    = parseInt(item.stock_quantity) || 999;  // matches getCart alias
         const subtotal = (price * qty).toFixed(2);
         return '<div class="cart-item" id="cart-item-' + cid + '">'
-            + '<div class="cart-item-icon">' + (item.icon || '🛒') + '</div>'
+            + '<div class="cart-item-icon">🐾</div>'
             + '<div class="cart-item-info">'
             +   '<h6>' + item.name + '</h6>'
-            +   '<span class="cart-item-price">₱' + price.toFixed(2) + ' / ' + (item.unit || 'pc') + '</span>'
+            +   '<span class="cart-item-price">₱' + price.toFixed(2) + '</span>'
             +   '<div class="cart-item-stepper">'
             +     '<button class="qty-btn" onclick="changeQty(' + cid + ',' + qty + ',-1,' + stock + ',' + price + ')">&#8722;</button>'
             +     '<span class="qty-num">' + qty + '</span>'

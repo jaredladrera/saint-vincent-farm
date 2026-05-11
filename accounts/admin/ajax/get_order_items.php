@@ -13,7 +13,6 @@ try {
             o.order_status,
             o.total_amount,
             o.created_at,
-
             u.first_name,
             u.last_name,
             u.email_address,
@@ -22,13 +21,11 @@ try {
 
             oi.quantity,
             oi.price,
-
-            p.name
+            oi.product_name as name
 
         FROM orders o
         JOIN user_profile u ON u.id = o.user_id
         JOIN order_items oi ON oi.order_id = o.id
-        JOIN livestock p ON p.id = oi.product_id
 
         WHERE o.id = ?
     ");

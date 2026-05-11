@@ -13,12 +13,13 @@ $pdo = $db->connection;
 
 // ── Category meta (icon, background colour, price unit) ──────────────────────
 $catMeta = [
-    'pigs'     => ['icon' => '🐷', 'bg' => '#f1f8e9', 'unit' => 'per head'],
-    'goats'    => ['icon' => '🐐', 'bg' => '#fff8e1', 'unit' => 'per head'],
-    'chickens' => ['icon' => '🐔', 'bg' => '#e8f5e9', 'unit' => 'per kg'],
-    'eggs'     => ['icon' => '🥚', 'bg' => '#fffde7', 'unit' => 'per piece'],
+    'Swine'     => ['icon' => '🐷', 'bg' => '#f1f8e9', 'unit' => 'per kg'],
+    'Goats'    => ['icon' => '🐐', 'bg' => '#fff8e1', 'unit' => 'per kg'],
+    'Poultry' => ['icon' => '🐔', 'bg' => '#e8f5e9', 'unit' => 'per head'],
+    'Cattle' => ['icon' => '🐂', 'bg' => '#7686ff', 'unit' => 'per kg'],
+    'Eggs'     => ['icon' => '🥚', 'bg' => '#fffde7', 'unit' => 'per piece'],
 ];
-$defaultMeta = ['icon' => '🐄', 'bg' => '#f3f4f6', 'unit' => 'per head'];
+$defaultMeta = ['icon' => '🐄', 'bg' => '#f3f4f6', 'unit' => 'per kg'];
 
 // ── Helper: build tag list from a DB row (stdObject from FETCH_OBJ) ──────────
 function buildTags(object $row): array {
@@ -65,9 +66,9 @@ function pickBadge(object $row): ?string {
 try {
     $stmt = $pdo->query(
         "SELECT id, category, name, quantity, price, is_vaccinated,
-                condition_notes, health_score, date_created
-         FROM livestock
-         ORDER BY date_created DESC, id DESC"
+                condition_notes, health_score, date_created, image
+        FROM livestock
+        ORDER BY date_created DESC, id DESC"
     );
     // FETCH_OBJ matches the default set in your Connect class
     $rows = $stmt->fetchAll(PDO::FETCH_OBJ);
@@ -80,6 +81,11 @@ try {
 $products = array_map(function (object $row) use ($catMeta, $defaultMeta): array {
     $cat  = strtolower(trim($row->category));
     $meta = $catMeta[$cat] ?? $defaultMeta;
+
+    // image path (adjust if needed)
+    $image = !empty($row->image)
+        ? 'uploads/' . $row->image
+        : null;
 
     return [
         'id'       => (int) $row->id,
@@ -95,6 +101,7 @@ $products = array_map(function (object $row) use ($catMeta, $defaultMeta): array
         'detail'   => htmlspecialchars($row->condition_notes, ENT_QUOTES)
                       . ' (Health score: ' . (int) $row->health_score . '/100)',
         'quantity' => (int) $row->quantity,
+        'image'    => $image, // ✅ ADD THIS
     ];
 }, $rows);
 
@@ -157,12 +164,21 @@ $filterCats = array_unique(array_column($products, 'cat'));
                      )">
 
                     <!-- Product Image / Icon -->
-                    <div class="product-img" style="background:<?= $p['bg'] ?>">
-                        <span><?= $p['icon'] ?></span>
-                        <?php if ($p['badge']): ?>
-                            <span class="product-badge"><?= $p['badge'] ?></span>
-                        <?php endif; ?>
-                    </div>
+                <div class="product-img" style="background:<?= $p['bg'] ?>; position:relative; overflow:hidden;">
+
+                    <?php if (!empty($p['image'])): ?>
+                    <img src="<?= $p['image'] ?>" 
+                        onclick="openImage(this.src)"
+                        style="width:100%; height:100%; object-fit:cover; cursor:pointer;">
+                    <?php else: ?>
+                        <span style="font-size:2rem;"><?= $p['icon'] ?></span>
+                    <?php endif; ?>
+
+                    <?php if ($p['badge']): ?>
+                        <span class="product-badge"><?= $p['badge'] ?></span>
+                    <?php endif; ?>
+
+                </div>
 
                     <!-- Product Body -->
                     <div class="product-body">
@@ -230,5 +246,8 @@ $filterCats = array_unique(array_column($products, 'cat'));
 
 <script>
     window.isLoggedIn = <?php echo isset($_SESSION['user']) ? 'true' : 'false'; ?>;
-
+    function openImage(src) {
+        const win = window.open("");
+        win.document.write(`<img src="${src}" style="width:100%">`);
+    }
 </script>

@@ -68,6 +68,7 @@ function getStockStatus(int $stock): string {
             <thead>
                 <tr>
                     <th>#</th>
+                    <th>Image</th>
                     <th>Livestock Name</th>
                     <th>Category</th>
                     <th>Price per kilo</th>
@@ -82,52 +83,53 @@ function getStockStatus(int $stock): string {
             <tbody id="livestockTableBody">
                 <?php if (empty($livestock_list)): ?>
                 <tr id="emptyRow">
-                    <td colspan="10" class="text-center text-muted py-4">
-                        <i class="bi bi-inbox fs-4 d-block mb-2"></i>
+                    <td colspan="11" class="text-center text-muted py-4">
                         No livestock records found.
                     </td>
                 </tr>
                 <?php else: ?>
                 <?php foreach ($livestock_list as $p):
-                    $status     = getStockStatus((int)$p['quantity']);
+                    $status = getStockStatus((int)$p['quantity']);
                     $statusSlug = strtolower(str_replace(' ', '-', $status));
                 ?>
-                <tr  data-name="<?= strtolower(htmlspecialchars($p['name'])) ?>"
-                     data-category="<?= htmlspecialchars($p['category']) ?>"
-                     data-status="<?= $status ?>">
-                    <td class="fw-semibold text-green small"><?= $p['id'] ?></td>
-                    <td><?= htmlspecialchars($p['name']) ?></td>
-                    <td><span class="category-tag"><?= htmlspecialchars($p['category']) ?></span></td>
-                    <td class="fw-semibold">₱<?= number_format($p['price'], 2) ?></td>
-                    <td><?= $p['quantity'] ?></td>
-                    <td 
-                        data-vaccinated="<?= $p['is_vaccinated'] ?>">
-                        <?= $p['is_vaccinated'] ? 'Yes' : 'No' ?>
+                <tr>
+                    <td><?= $p['id'] ?></td>
+
+                    <!-- IMAGE -->
+                    <td>
+                        <?php if (!empty($p['image'])): ?>
+                            <img src="../../uploads/<?= htmlspecialchars($p['image']) ?>" width="50" height="50" style="object-fit:cover;">
+                        <?php else: ?>
+                            <span class="text-muted">No Image</span>
+                        <?php endif; ?>
                     </td>
+
+                    <td><?= htmlspecialchars($p['name']) ?></td>
+                    <td><?= htmlspecialchars($p['category']) ?></td>
+                    <td>₱<?= number_format($p['price'], 2) ?></td>
+                    <td><?= $p['quantity'] ?></td>
+                    <td><?= $p['is_vaccinated'] ? 'Yes' : 'No' ?></td>
                     <td><?= htmlspecialchars($p['health_score']) ?></td>
                     <td><?= htmlspecialchars($p['condition_notes']) ?></td>
-                    <td><span class="status-badge status-<?= $statusSlug ?>"><?= $status ?></span></td>
+                    <td><?= $status ?></td>
+
                     <td>
-                        <div class="action-btns">
-                            <button class="action-btn edit editLivestockBtn"
-                                title="Edit"
-                                data-id="<?= $p['id'] ?>"
-                                data-name="<?= htmlspecialchars($p['name']) ?>"
-                                data-category="<?= htmlspecialchars($p['category']) ?>"
-                                data-price="<?= $p['price'] ?>"
-                                data-stock="<?= $p['quantity'] ?>"
-                                data-is_vaccinated="<?= htmlspecialchars($p['is_vaccinated']) ?>"
-                                data-health="<?= htmlspecialchars($p['health_score']) ?>"
-                                data-notes="<?= htmlspecialchars($p['condition_notes']) ?>">
-                                <i class="bi bi-pencil"></i>
-                            </button>
-                            <button class="action-btn delete deleteLivestockBtn"
-                                title="Delete"
-                                data-id="<?= $p['id'] ?>"
-                                data-name="<?= htmlspecialchars($p['name']) ?>">
-                                <i class="bi bi-trash"></i>
-                            </button>
-                        </div>
+                        <button class="editLivestockBtn btn btn-primary btn-sm"
+                            data-id="<?= $p['id'] ?>"
+                            data-name="<?= htmlspecialchars($p['name']) ?>"
+                            data-category="<?= htmlspecialchars($p['category']) ?>"
+                            data-price="<?= $p['price'] ?>"
+                            data-stock="<?= $p['quantity'] ?>"
+                            data-is_vaccinated="<?= $p['is_vaccinated'] ?>"
+                            data-health="<?= htmlspecialchars($p['health_score']) ?>"
+                            data-notes="<?= htmlspecialchars($p['condition_notes']) ?>">
+                            Edit
+                        </button>
+
+                        <button class="deleteLivestockBtn btn btn-danger btn-sm"
+                            data-id="<?= $p['id'] ?>">
+                            Delete
+                        </button>
                     </td>
                 </tr>
                 <?php endforeach; ?>
@@ -202,6 +204,10 @@ function getStockStatus(int $stock): string {
                 <div class="mb-3">
                     <label class="form-label" for="productNotes">Conditional Notes</label>
                     <textarea id="productNotes" class="form-control" rows="3" placeholder="Short livestock description…"></textarea>
+                </div>
+                <div class="mb-3">
+                    <label class="form-label">Livestock Image</label>
+                    <input type="file" id="productImage" class="form-control" accept="image/*">
                 </div>
             </div>
             <div class="modal-footer">
@@ -314,99 +320,32 @@ $(function () {
     // SAVE — INSERT or UPDATE
     // ══════════════════════════════════
     $('#saveProductBtn').on('click', function () {
-        if (!validate()) return;
 
-        const $btn    = $(this);
-        const id      = $('#livestockId').val();
-        const isEdit  = id !== '';
-        const action  = isEdit ? 'update' : 'insert';
+        const formData = new FormData();
 
-        // ✅ Capture all values HERE before anything clears them
-        const captured = {
-            name      : $('#productName').val().trim(),
-            category  : $('#productCategory').val(),
-            price     : $('#productPrice').val().trim(),
-            stock     : $('#productStock').val().trim(),
-            is_vaccinated: $('#productVaccinated').val(),
-            health    : $('#productHealthScore').val().trim(),
-            notes     : $('#productNotes').val().trim(),
-        };
-       
-        $btn.prop('disabled', true).html('<i class="bi bi-hourglass-split"></i> Saving...');
+        formData.append('action', $('#livestockId').val() ? 'update' : 'insert');
+        formData.append('id', $('#livestockId').val());
+        formData.append('name', $('#productName').val());
+        formData.append('category', $('#productCategory').val());
+        formData.append('price', $('#productPrice').val());
+        formData.append('stock', $('#productStock').val());
+        formData.append('is_vaccinated', $('#productVaccinated').val());
+        formData.append('health_score', $('#productHealthScore').val());
+        formData.append('notes', $('#productNotes').val());
+
+        let file = $('#productImage')[0].files[0];
+        if (file) {
+            formData.append('image', file);
+        }
 
         $.ajax({
             url: 'ajax/save_livestock.php',
             type: 'POST',
-            dataType: 'json',
-            data: {
-                action      : action,
-                id          : id,
-                name        : captured.name,
-                category    : captured.category,
-                price       : captured.price,
-                stock       : captured.stock,
-                is_vaccinated  : captured.is_vaccinated,
-                health_score: captured.health,
-                notes       : captured.notes,
-            },
+            data: formData,
+            processData: false,
+            contentType: false,
             success: function (res) {
-                 
-                if (res.success) {
-                    $('#addProductModal').modal('hide');
-                    resetModal(); // ✅ Safe to reset now — we already have captured values
-
-                    if (isEdit) {
-                        const status  = getStockStatus(captured.stock);
-                        const $row    = $('.editLivestockBtn[data-id="' + id + '"]').closest('tr');
-
-                        // ✅ Update row using captured values
-                        $row.attr('data-name',     captured.name.toLowerCase());
-                        $row.attr('data-category', captured.category);
-                        $row.attr('data-status',   status.label);
-
-                        $row.find('td:nth-child(2)').text(captured.name);
-                        $row.find('td:nth-child(3) .category-tag').text(captured.category);
-                        $row.find('td:nth-child(4)').text('₱' + parseFloat(captured.price).toFixed(2));
-                        $row.find('td:nth-child(5)').text(captured.stock);
-                        const vaccinatedText = captured.is_vaccinated == 1 ? 'Yes' : 'No';
-                        $row.find('td:nth-child(6)').text(vaccinatedText);
-                        $row.find('td:nth-child(7)').text(captured.health);
-                        $row.find('td:nth-child(8)').text(captured.notes);
-                        $row.find('td:nth-child(9) .status-badge')
-                            .attr('class', 'status-badge status-' + status.slug)
-                            .text(status.label);
-
-                        // ✅ Refresh data attributes on edit button
-                        const $editBtn = $row.find('.editLivestockBtn');
-                        $editBtn.attr('data-name',      captured.name);
-                        $editBtn.attr('data-category',  captured.category);
-                        $editBtn.attr('data-price',     captured.price);
-                        $editBtn.attr('data-stock',     captured.stock);
-                        $editBtn.attr('data-is_vaccinated',captured.is_vaccinated);
-                        $editBtn.attr('data-health',    captured.health);
-                        $editBtn.attr('data-notes',     captured.notes);
-
-                        showToast('Livestock updated successfully!', 'success');
-
-                    } else {
-                        // New insert — reload to get real DB id
-                        showToast('Livestock added successfully!', 'success');
-                        setTimeout(() => location.reload(), 1000);
-                    }
-
-                } else {
-                    showToast('Error: ' + res.message, 'danger');
-                }
-            },
-            error: function (xhr) {
-                showToast('Server error. Please try again.', 'danger');
-                console.error(xhr.responseText);
-            },
-            complete: function () {
-                $btn.prop('disabled', false).html(
-                    '<i class="bi bi-' + (isEdit ? 'pencil' : 'save') + '"></i> ' +
-                    (isEdit ? 'Update Livestock' : 'Save Livestock')
-                );
+                location.reload();
             }
         });
     });

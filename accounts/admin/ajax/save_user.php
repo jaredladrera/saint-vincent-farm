@@ -26,7 +26,7 @@ if ($action == 'insert') {
         $_POST['email'],
         $_POST['address'],
         $_POST['role'],
-        password_hash($_POST['password'], PASSWORD_DEFAULT)
+        $_POST['password'] // ❌ plain text
     ]);
 
     echo json_encode(['success' => true]);
@@ -55,7 +55,7 @@ elseif ($action == 'update') {
 
     if (!empty($_POST['password'])) {
         $sql .= ", password=?";
-        $params[] = password_hash($_POST['password'], PASSWORD_DEFAULT);
+        $params[] = $_POST['password']; // ❌ plain text
     }
 
     $sql .= " WHERE id=?";

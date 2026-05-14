@@ -47,7 +47,7 @@ try {
     $stmt = $pdo->query("
         SELECT SUM(total_amount) AS total 
         FROM orders 
-        WHERE order_status != 'cancelled'
+        WHERE order_status = 'delivered'
     ");
     $total_sales = $stmt->fetch(PDO::FETCH_ASSOC)['total'] ?? 0;
 
@@ -62,7 +62,7 @@ try {
             DATE_FORMAT(created_at, '%Y-%m') as month,
             SUM(total_amount) as total
         FROM orders
-        WHERE order_status != 'cancelled'
+        WHERE order_status = 'delivered'
         GROUP BY DATE_FORMAT(created_at, '%Y-%m')
         ORDER BY month ASC
         LIMIT 6

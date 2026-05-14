@@ -111,8 +111,8 @@ try {
 
                 <select id="orderStatus" class="form-control">
                     <option value="pending">Pending</option>
-                    <option value="paid">Paid</option>
-                    <option value="shipped">Shipped</option>
+                    <option value="processing">Processing</option>
+                    <option value="out_for_delivery">Out for Delivery</option>
                     <option value="delivered">Delivered</option>
                     <option value="cancelled">Cancelled</option>
                 </select>
@@ -405,7 +405,7 @@ function saveRider() {
 
 $(function () {
 
-    let rowsPerPage = 5;
+    let rowsPerPage = 10;
     let currentPage = 1;
 
     function paginate() {
@@ -561,9 +561,7 @@ $(function () {
             status: status
             // delivery_fee: delivery_fee
         }, function (res) {
-
-        console.log("res", res);
-
+            
             if (res.success) {
 
                 let row = $(`button[data-id="${id}"]`).closest('tr');

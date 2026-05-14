@@ -48,7 +48,7 @@
         <div class="hero-right">
             <div class="hero-bg-img"></div>
             <div class="hero-farm-art">
-                <div class="farm-card-float">
+                <!-- <div class="farm-card-float">
                     <h4>
                         <i class="bi bi-activity" style="color:var(--amber)"></i>
                         Live Inventory
@@ -75,7 +75,7 @@
                         <span class="updated">Updated just now</span>
                         <span class="status">● System Online</span>
                     </div>
-                </div>
+                </div> -->
             </div>
         </div>
     </div>

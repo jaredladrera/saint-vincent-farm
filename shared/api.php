@@ -361,6 +361,56 @@ if(isset($_POST['key'])):
 
     endif;
 
+    if($key === "update_payroll"):
+
+        $stmt = $pdo->prepare("
+            UPDATE payroll SET
+                period_start    = :period_start,
+                period_end      = :period_end,
+                daily_rate      = :daily_rate,
+                basic_pay       = :basic_pay,
+                ot_pay          = :ot_pay,
+                sss             = :sss,
+                philhealth      = :philhealth,
+                pagibig         = :pagibig,
+                late_deduction  = :late_deduction,
+                other_deduction = :other_deduction,
+                total_deduction = :total_deduction,
+                net_pay         = :net_pay,
+                status          = :status
+            WHERE id = :id
+        ");
+
+        $stmt->execute([
+            ':period_start'    => $_POST['period_start'],
+            ':period_end'      => $_POST['period_end'],
+            ':daily_rate'      => (float)$_POST['daily_rate'],
+            ':basic_pay'       => (float)$_POST['basic_pay'],
+            ':ot_pay'          => (float)($_POST['ot_pay'] ?? 0),
+            ':sss'             => (float)($_POST['sss'] ?? 0),
+            ':philhealth'      => (float)($_POST['philhealth'] ?? 0),
+            ':pagibig'         => (float)($_POST['pagibig'] ?? 0),
+            ':late_deduction'  => (float)($_POST['late_deduction'] ?? 0),
+            ':other_deduction' => (float)($_POST['other_deduction'] ?? 0),
+            ':total_deduction' => (float)($_POST['total_deduction'] ?? 0),
+            ':net_pay'         => (float)$_POST['net_pay'],
+            ':status'          => $_POST['status'] === 'paid' ? 1 : 0,
+            ':id'              => (int)$_POST['id'],
+        ]);
+
+        echo json_encode(['success' => true]);
+
+    endif;
+
+    if($key === "delete_payroll"):
+
+        $stmt = $pdo->prepare("DELETE FROM payroll WHERE id = ?");
+        $stmt->execute([(int)$_POST['id']]);
+
+        echo json_encode(['success' => true]);
+
+    endif;
+
 endif;
  
 ?>

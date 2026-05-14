@@ -22,7 +22,7 @@ if ($page === 'logout') {
 $allowed_pages = [
     'home', 'shop', 'features', 'about', 'contact', 'profile', 'my_order', 'forgot_password',
     'login', 'register', 'order_request_form', 'upload_proof', 'order_success',
-    'account/admin', 'account/staff',
+    'account/admin', 'account/staff'
 ];
 if (!in_array($page, $allowed_pages)) $page = 'home';
 
@@ -51,6 +51,7 @@ $titles = [
     'contact'  => 'Place Order',
     'login'    => 'Sign In',
     'register' => 'Create Account',
+    'mypayslip' => "Payslip"
 ];
 $page_title = $titles[$page] ?? 'Page';
 $auth_pages = ['login', 'register'];

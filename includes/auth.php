@@ -13,7 +13,7 @@ function isLoggedIn(): bool {
 }
 
 // ── Get current logged-in user ──
-function currentUser(): ?array {
+function currentUser(): ? array {
     return $_SESSION['user'] ?? null;
 }
 

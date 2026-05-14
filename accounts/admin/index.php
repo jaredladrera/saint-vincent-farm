@@ -17,7 +17,7 @@ define('BASE_URL', rtrim(dirname($_SERVER['SCRIPT_NAME']), '/\\'));
 
 $page = $_GET['page'] ?? 'dashboard';
 
-$allowed_pages = ['dashboard', 'products', 'orders', 'users', 'profile'];
+$allowed_pages = ['dashboard', 'products', 'orders', 'users', 'profile', 'delivery', 'payroll', 'payslip', 'mypayslip'];
 if (!in_array($page, $allowed_pages)) $page = 'dashboard';
 
 $titles = [
@@ -26,6 +26,10 @@ $titles = [
     'orders'  => 'Orders',
     'users'  => 'Users',
     'profile'   => 'Profile',
+    'delivery'   => 'Delivery',
+    'payroll'   => 'Payroll',
+    'payslip'   => 'Payslip',
+    'mypayslip'   => 'Payslip',
 ];
 $page_title = $titles[$page] ?? 'Admin';
 ?>
@@ -52,6 +56,10 @@ $page_title = $titles[$page] ?? 'Admin';
                 elseif  ($page === 'orders')  { require BASE_DIR . '/pages/orders.php'; }
                 elseif  ($page === 'users')  { require BASE_DIR . '/pages/users.php'; }
                 elseif  ($page === 'profile')   { require BASE_DIR . '/pages/profile.php'; }
+                elseif  ($page === 'payroll')   { require BASE_DIR . '/pages/payroll.php'; }
+                elseif  ($page === 'payslip')   { require BASE_DIR . '/pages/payslip.php'; }
+                elseif  ($page === 'mypayslip')   { require BASE_DIR . '/pages/mypayslip.php'; }
+                elseif  ($page === 'delivery')   { require BASE_DIR . '/pages/delivery.php'; }
                 else                            { require BASE_DIR . '/pages/dashboard.php'; }
             ?>
         </main>

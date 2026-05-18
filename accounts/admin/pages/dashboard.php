@@ -26,7 +26,7 @@ try {
     /* =========================
        TOTAL LIVESTOCK (KEEP)
     ========================= */
-    $stmt = $pdo->query("SELECT COUNT(*) AS total FROM livestock");
+    $stmt = $pdo->query("SELECT COUNT(*) AS total FROM livestock WHERE product_type = 'Livestock'");
     $total_livestock = $stmt->fetch(PDO::FETCH_ASSOC)['total'] ?? 0;
 
     /* =========================
@@ -38,7 +38,7 @@ try {
     /* =========================
        TOTAL PRODUCTS
     ========================= */
-    $stmt = $pdo->query("SELECT COUNT(*) AS total FROM livestock");
+    $stmt = $pdo->query("SELECT COUNT(*) AS total FROM livestock WHERE product_type = 'Product'");
     $total_products = $stmt->fetch(PDO::FETCH_ASSOC)['total'] ?? 0;
 
     /* =========================
@@ -116,6 +116,22 @@ try {
     $monthly_sales   = 0;
     $recent_orders   = [];
 }
+
+
+function getBadgeClass($status) {
+    switch ($status) {
+        case 'pending':
+            return 'bg-warning text-dark'; // yellow
+        case 'delivered':
+            return 'bg-success'; // green
+        case 'out_for_delivery':
+            return 'bg-primary'; // blue
+        case 'processing':
+            return 'bg-info text-dark'; // light blue
+        default:
+            return 'bg-secondary'; // gray fallback
+    }
+}
 ?>
 <!-- Stats Row -->
 <div class="row g-4 mb-4">
@@ -146,7 +162,7 @@ try {
         </div>
     </div>
 
-    <div class="col-6 col-xl-3">
+    <div class="col-6 col-xl-2">
         <div class="stat-card">
             <div class="stat-icon bg-warning-soft">
                 <i class="bi bi-people"></i>
@@ -159,7 +175,7 @@ try {
         </div>
     </div>
 
-    <div class="col-6 col-xl-3">
+    <div class="col-6 col-xl-2">
         <div class="stat-card">
             <div class="stat-icon bg-danger-soft">
                 <i class="bi bi-box-seam"></i>
@@ -167,6 +183,19 @@ try {
             <div class="stat-info">
                 <span class="stat-label">Products</span>
                 <span class="stat-value"><?= $total_products ?></span>
+                <!-- <span class="stat-change negative"><i class="bi bi-arrow-down-short"></i>2%</span> -->
+            </div>
+        </div>
+    </div>
+
+    <div class="col-6 col-xl-2">
+        <div class="stat-card">
+            <div class="stat-icon bg-warning-soft">
+                <i class="bi bi-bucket"></i>
+            </div>
+            <div class="stat-info">
+                <span class="stat-label">Livestocks</span>
+                <span class="stat-value"><?= $total_livestock ?></span>
                 <!-- <span class="stat-change negative"><i class="bi bi-arrow-down-short"></i>2%</span> -->
             </div>
         </div>
@@ -187,7 +216,7 @@ try {
                     <option>This year</option>
                 </select> -->
             </div>
-            <canvas id="salesChart" height="110"></canvas>
+            <canvas id="salesChart" height="150"></canvas>
         </div>
     </div>
 
@@ -196,7 +225,7 @@ try {
             <div class="card-panel-header">
                 <span>Category Split</span>
             </div>
-            <canvas id="donutChart" height="180"></canvas>
+            <canvas id="donutChart" height="160"></canvas>
         </div>
     </div>
 
@@ -229,7 +258,7 @@ try {
                             <td><?= htmlspecialchars($o['customer_name']) ?></td>
                             <td>₱<?= number_format($o['total_amount'], 2) ?></td>
                             <td>
-                                <span class="badge bg-info"><?= $o['order_status'] ?></span>
+                                <span class="badge  <?= getBadgeClass($o['order_status']) ?>"><?= $o['order_status'] ?></span>
                             </td>
                             <td><?= htmlspecialchars($o['created_at']) ?></td>
                         </tr>
@@ -297,11 +326,11 @@ if (donutCtx) {
                 data: livestockCounts,
                 backgroundColor: [
                     '#0B6B1C',
-                    '#34a84a',
+                    '#3495a8',
                     '#a8e6b3',
-                    '#2d6a35',
-                    '#6ccf7f',
-                    '#1f7a2e'
+                    '#ba2323',
+                    '#ecb71b',
+                    '#8c1990'
                 ],
                 borderWidth: 0
             }]

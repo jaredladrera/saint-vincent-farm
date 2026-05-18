@@ -23,24 +23,24 @@ function getStockStatus(int $stock): string {
 <!-- Page Header -->
 <div class="page-header mb-4">
     <div>
-        <h5 class="page-heading mb-1">Livestocks</h5>
-        <p class="text-muted mb-0 small">Manage your livestock inventory</p>
+        <h5 class="page-heading mb-1">Products</h5>
+        <p class="text-muted mb-0 small">Manage your product inventory</p>
     </div>
     <button class="btn btn-green" id="addLivestockBtn" data-bs-toggle="modal" data-bs-target="#addProductModal">
-        <i class="bi bi-plus-lg me-1"></i> Add Livestock
+        <i class="bi bi-plus-lg me-1"></i> Add Product
     </button>
 </div>
 
 <!-- Filter Bar -->
 <div class="card-panel mb-4">
     <div class="row g-2 align-items-center">
-        <div class="col-12 col-md-5">
+        <div class="col-4 col-md-3">
             <div class="search-bar">
                 <i class="bi bi-search"></i>
                 <input type="text" id="productSearch" class="form-control" placeholder="Search livestock…" />
             </div>
         </div>
-        <div class="col-6 col-md-3">
+        <div class="col-4 col-md-3">
             <select class="form-select" id="categoryFilter">
                 <option value="">All Categories</option>
                 <option>Cattle</option>
@@ -50,12 +50,19 @@ function getStockStatus(int $stock): string {
                 <option>Poultry</option>
             </select>
         </div>
-        <div class="col-6 col-md-3">
+        <div class="col-4 col-md-3">
             <select class="form-select" id="stockFilter">
                 <option value="">All Status</option>
                 <option>In Stock</option>
                 <option>Low Stock</option>
                 <option>Out of Stock</option>
+            </select>
+        </div>
+        <div class="col-4 col-md-3">
+            <select class="form-select" id="typeFilter">
+                <option value="">All Type</option>
+                <option>Product</option>
+                <option>Livestock</option>
             </select>
         </div>
     </div>
@@ -69,14 +76,16 @@ function getStockStatus(int $stock): string {
                 <tr>
                     <th>#</th>
                     <th>Image</th>
-                    <th>Livestock Name</th>
+                    <th>Product Name</th>
                     <th>Category</th>
-                    <th>Price per kilo</th>
                     <th>Stock</th>
+                    <th>SKU</th>
+                    <th>Price per SKU</th>
                     <th>Vaccinated</th>
                     <th>Health Score</th>
                     <th>Condition Notes</th>
                     <th>Status</th>
+                    <th>Product Type</th>
                     <th>Actions</th>
                 </tr>
             </thead>
@@ -92,7 +101,10 @@ function getStockStatus(int $stock): string {
                     $status = getStockStatus((int)$p['quantity']);
                     $statusSlug = strtolower(str_replace(' ', '-', $status));
                 ?>
-                <tr>
+                <tr data-name="<?= strtolower(htmlspecialchars($p['name'])) ?>"
+    data-category="<?= htmlspecialchars($p['category']) ?>"
+    data-status="<?= $status ?>"
+    data-type="<?= htmlspecialchars($p['product_type']) ?>">
                     <td><?= $p['id'] ?></td>
 
                     <!-- IMAGE -->
@@ -106,12 +118,14 @@ function getStockStatus(int $stock): string {
 
                     <td><?= htmlspecialchars($p['name']) ?></td>
                     <td><?= htmlspecialchars($p['category']) ?></td>
-                    <td>₱<?= number_format($p['price'], 2) ?></td>
                     <td><?= $p['quantity'] ?></td>
+                    <td><?= $p['sku'] ?></td>
+                    <td>₱<?= number_format($p['price'], 2) ?></td>
                     <td><?= $p['is_vaccinated'] ? 'Yes' : 'No' ?></td>
                     <td><?= htmlspecialchars($p['health_score']) ?></td>
                     <td><?= htmlspecialchars($p['condition_notes']) ?></td>
                     <td><?= $status ?></td>
+                    <td><?= htmlspecialchars($p['product_type']) ?></td>
 
                     <td>
                         <button class="editLivestockBtn btn btn-primary btn-sm"
@@ -122,7 +136,9 @@ function getStockStatus(int $stock): string {
                             data-stock="<?= $p['quantity'] ?>"
                             data-is_vaccinated="<?= $p['is_vaccinated'] ?>"
                             data-health="<?= htmlspecialchars($p['health_score']) ?>"
-                            data-notes="<?= htmlspecialchars($p['condition_notes']) ?>">
+                            data-notes="<?= htmlspecialchars($p['condition_notes']) ?>"
+                            data-sku="<?= htmlspecialchars($p['sku']) ?>"
+                            data-product_type="<?= htmlspecialchars($p['product_type']) ?>">
                             Edit
                         </button>
 
@@ -158,18 +174,18 @@ function getStockStatus(int $stock): string {
             <div class="modal-header">
                 <h6 class="modal-title fw-bold" id="addProductLabel">
                     <i class="bi bi-plus-circle me-2 text-green" id="modalIcon"></i>
-                    <span id="modalTitle">Add New Livestock</span>
+                    <span id="modalTitle">Add New Product</span>
                 </h6>
                 <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
             </div>
             <div class="modal-body">
                 <input type="hidden" id="livestockId" value="" />
                 <div class="mb-3">
-                    <label class="form-label" for="productName">Livestock Name</label>
+                    <label class="form-label" for="productName">Product Name</label>
                     <input type="text" id="productName" class="form-control" placeholder="e.g. Chicken, Pig" />
                 </div>
                 <div class="row g-3 mb-3">
-                    <div class="col-6">
+                    <div class="col-4">
                         <label class="form-label" for="productCategory">Category</label>
                         <select id="productCategory" class="form-select">
                             <option>Cattle</option>
@@ -179,15 +195,25 @@ function getStockStatus(int $stock): string {
                             <option>Poultry</option>
                         </select>
                     </div>
-                    <div class="col-6">
-                        <label class="form-label" for="productPrice">Price (₱) per kilo</label>
-                        <input type="number" id="productPrice" class="form-control" placeholder="0.00" />
+                    <div class="col-4">
+                        <label class="form-label" for="productStock">Stock Quantity</label>
+                        <input type="number" id="productStock" class="form-control" placeholder="0" />
+                    </div>
+                    <div class="col-4">
+                        <label class="form-label" for="sku">SKU</label>
+                        <select id="sku" class="form-select">
+                            <option>PC</option>
+                            <option>BOX</option>
+                            <option>KG</option>
+                            <option>PACK</option>
+                            <option>Others</option>
+                        </select>
                     </div>
                 </div>
                 <div class="row g-3 mb-3">
                     <div class="col-6">
-                        <label class="form-label" for="productStock">Stock Quantity</label>
-                        <input type="number" id="productStock" class="form-control" placeholder="0" />
+                        <label class="form-label" for="productPrice">Price (₱) per SKU</label>
+                        <input type="number" id="productPrice" class="form-control" placeholder="0.00" />
                     </div>
                     <div class="col-6">
                         <label class="form-label" for="productVaccinated">Vaccinated</label>
@@ -197,16 +223,25 @@ function getStockStatus(int $stock): string {
                         </select>
                     </div>
                 </div>
-                <div class="mb-3">
-                    <label class="form-label" for="productHealthScore">Health Score</label>
-                    <input type="text" id="productHealthScore" class="form-control" placeholder="e.g. 100 out of 100 is healthy" />
+                <div class="row g-3 mb-3">
+                    <div class="col-6">
+                        <label class="form-label" for="productHealthScore">Health Score</label>
+                        <input type="text" id="productHealthScore" class="form-control" placeholder="e.g. 100 out of 100 is healthy" />
+                    </div>
+                    <div class="col-6">
+                        <label class="form-label" for="productType">Product Type</label>
+                        <select id="productType" class="form-select">
+                            <option value="Product">Product</option>
+                            <option value="Livestock">Livestock</option>
+                        </select>
+                    </div>
                 </div>
                 <div class="mb-3">
                     <label class="form-label" for="productNotes">Conditional Notes</label>
                     <textarea id="productNotes" class="form-control" rows="3" placeholder="Short livestock description…"></textarea>
                 </div>
                 <div class="mb-3">
-                    <label class="form-label">Livestock Image</label>
+                    <label class="form-label">Product Image</label>
                     <input type="file" id="productImage" class="form-control" accept="image/*">
                 </div>
             </div>
@@ -214,7 +249,7 @@ function getStockStatus(int $stock): string {
                 <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-dismiss="modal">Cancel</button>
                 <button type="button" class="btn btn-green btn-sm" id="saveProductBtn">
                     <i class="bi bi-save" id="saveBtnIcon"></i>
-                    <span id="saveBtnText">Save Livestock</span>
+                    <span id="saveBtnText">Save Product</span>
                 </button>
             </div>
         </div>
@@ -237,9 +272,9 @@ $(function () {
     function resetModal() {
         $('#livestockId').val('');
         $('#modalIcon').attr('class', 'bi bi-plus-circle me-2 text-green');
-        $('#modalTitle').text('Add New Livestock');
+        $('#modalTitle').text('Add New Product');
         $('#saveBtnIcon').attr('class', 'bi bi-save');
-        $('#saveBtnText').text('Save Livestock');
+        $('#saveBtnText').text('Save Product');
         $('#productName').val('');
         $('#productPrice').val('');
         $('#productStock').val('');
@@ -247,6 +282,8 @@ $(function () {
         $('#productNotes').val('');
         $('#productCategory').prop('selectedIndex', 0);
         $('#productVaccinated').prop('selectedIndex', 0);
+        $('#productType').prop('selectedIndex', 0);
+        $('#sku').val('');
         // Clear validation states
         $('.form-control, .form-select').removeClass('is-invalid');
     }
@@ -301,9 +338,9 @@ $(function () {
 
         $('#livestockId').val(d.id);
         $('#modalIcon').attr('class', 'bi bi-pencil-square me-2 text-warning');
-        $('#modalTitle').text('Edit Livestock');
+        $('#modalTitle').text('Edit Product');
         $('#saveBtnIcon').attr('class', 'bi bi-pencil');
-        $('#saveBtnText').text('Update Livestock');
+        $('#saveBtnText').text('Update Product');
 
         $('#productName').val(d.name);
         $('#productCategory').val(d.category);
@@ -312,7 +349,9 @@ $(function () {
         $('#productVaccinated').val(d.is_vaccinated);
         $('#productHealthScore').val(d.health);
         $('#productNotes').val(d.notes);
-
+        $('#productType').val(d.product_type);
+        $('#sku').val(d.sku);
+                            
         $('#addProductModal').modal('show');
     });
 
@@ -332,6 +371,8 @@ $(function () {
         formData.append('is_vaccinated', $('#productVaccinated').val());
         formData.append('health_score', $('#productHealthScore').val());
         formData.append('notes', $('#productNotes').val());
+        formData.append('product_type', $('#productType').val());
+        formData.append('sku', $('#sku').val());
 
         let file = $('#productImage')[0].files[0];
         if (file) {
@@ -397,35 +438,38 @@ $(function () {
     // LIVE SEARCH + FILTER
     // ══════════════════════════════════
     function applyFilters() {
-    const q   = $('#productSearch').val().toLowerCase().trim();
-    const cat = $('#categoryFilter').val();
-    const st  = $('#stockFilter').val();
-    let visible = 0;
+        const q   = $('#productSearch').val().toLowerCase().trim();
+        const cat = $('#categoryFilter').val();
+        const st  = $('#stockFilter').val();
+        const tp  = $('#typeFilter').val();
+        let visible = 0;
 
-    $('#livestockTableBody tr').each(function () {
-        // ✅ Use .attr() instead of .data() for reliable HTML attribute reading
-        const name     = $(this).attr('data-name')     || '';
-        const category = $(this).attr('data-category') || '';
-        const status   = $(this).attr('data-status')   || '';
+        $('#livestockTableBody tr').each(function () {
+            if ($(this).attr('id') === 'emptyRow') return;
 
-        // Skip the empty state row
-        if ($(this).attr('id') === 'emptyRow') return;
+            const name     = $(this).attr('data-name')     || '';
+            const category = $(this).attr('data-category') || '';
+            const status   = $(this).attr('data-status')   || '';
+            const type     = $(this).attr('data-type')     || '';
 
-        const matchQ   = !q   || name.includes(q);
-        const matchCat = !cat || category === cat;
-        const matchSt  = !st  || status === st;
-        const show     = matchQ && matchCat && matchSt;
+            const matchQ   = !q   || name.includes(q);
+            const matchCat = !cat || category === cat;
+            const matchSt  = !st  || status === st;
+            const matchTp  = !tp  || type === tp;
+            const show     = matchQ && matchCat && matchSt && matchTp;
 
-        $(this).toggle(show);
-        if (show) visible++;
+            $(this).toggle(show);
+            if (show) visible++;
         });
 
         $('#rowCount').text(visible);
     }
 
+    // Also add the missing typeFilter listener:
     $('#productSearch').on('input',   applyFilters);
     $('#categoryFilter').on('change', applyFilters);
     $('#stockFilter').on('change',    applyFilters);
+    $('#typeFilter').on('change',     applyFilters); 
 
     // ══════════════════════════════════
     // TOAST HELPER

@@ -32,8 +32,8 @@ if ($action == 'insert') {
 
     $stmt = $pdo->prepare("
         INSERT INTO livestock 
-        (name, category, price, quantity, is_vaccinated, health_score, condition_notes, image, date_created)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, NOW())
+        (name, category, price, quantity, is_vaccinated, health_score, condition_notes, product_type, sku, image, date_created)
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, NOW())
     ");
 
     $stmt->execute([
@@ -44,6 +44,8 @@ if ($action == 'insert') {
         $_POST['is_vaccinated'],
         $_POST['health_score'],
         $_POST['notes'],
+        $_POST['product_type'],
+        $_POST['sku'],
         $imageName
     ]);
 
@@ -54,7 +56,7 @@ elseif ($action == 'update') {
 
     $sql = "UPDATE livestock SET 
         name=?, category=?, price=?, quantity=?, 
-        is_vaccinated=?, health_score=?, condition_notes=?";
+        is_vaccinated=?, health_score=?, condition_notes=?, product_type=?, sku=?";
 
     $params = [
         $_POST['name'],
@@ -63,7 +65,9 @@ elseif ($action == 'update') {
         $_POST['stock'],
         $_POST['is_vaccinated'],
         $_POST['health_score'],
-        $_POST['notes']
+        $_POST['notes'],
+        $_POST['product_type'],
+        $_POST['sku'],
     ];
 
     if (!empty($_FILES['image']['name'])) {

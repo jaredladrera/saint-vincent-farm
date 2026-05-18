@@ -20,6 +20,21 @@ try {
 } catch (PDOException $e) {
     $order_list = [];
 }
+
+function getBadgeClass($status) {
+    switch ($status) {
+        case 'pending':
+            return 'bg-warning text-dark'; // yellow
+        case 'delivered':
+            return 'bg-success'; // green
+        case 'out_for_delivery':
+            return 'bg-primary'; // blue
+        case 'processing':
+            return 'bg-info text-dark'; // light blue
+        default:
+            return 'bg-secondary'; // gray fallback
+    }
+}
 ?>
 
 <div class="page-header mb-4">
@@ -48,7 +63,9 @@ try {
             <td><?= htmlspecialchars($o['customer_name']) ?></td>
             <td>₱<?= number_format($o['total_amount'], 2) ?></td>
             <td>
-                <span class="badge bg-info"><?= $o['order_status'] ?></span>
+                <span class="badge <?= getBadgeClass($o['order_status']) ?>">
+                    <?= htmlspecialchars($o['order_status']) ?>
+                </span>
             </td>
             <td><?= $o['created_at'] ?></td>
             <td>

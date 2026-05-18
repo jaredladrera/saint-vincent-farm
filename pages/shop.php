@@ -13,13 +13,13 @@ $pdo = $db->connection;
 
 // ── Category meta (icon, background colour, price unit) ──────────────────────
 $catMeta = [
-    'Swine'     => ['icon' => '🐷', 'bg' => '#f1f8e9', 'unit' => 'per kg'],
-    'Goats'    => ['icon' => '🐐', 'bg' => '#fff8e1', 'unit' => 'per kg'],
-    'Poultry' => ['icon' => '🐔', 'bg' => '#e8f5e9', 'unit' => 'per head'],
+    'Swine'     => ['icon' => '🐷', 'bg' => '#f1f8e9', 'unit' => 'per head'],
+    'Goats'    => ['icon' => '🐐', 'bg' => '#fff8e1', 'unit' => 'per head'],
+    'Poultry' => ['icon' => '🐔', 'bg' => '#e8f5e9', 'unit' => 'per kg'],
     'Cattle' => ['icon' => '🐂', 'bg' => '#7686ff', 'unit' => 'per kg'],
     'Eggs'     => ['icon' => '🥚', 'bg' => '#fffde7', 'unit' => 'per piece'],
 ];
-$defaultMeta = ['icon' => '🐄', 'bg' => '#f3f4f6', 'unit' => 'per kg'];
+$defaultMeta = ['icon' => '🐄', 'bg' => '#f3f4f6', 'unit' => 'per head'];
 
 // ── Helper: build tag list from a DB row (stdObject from FETCH_OBJ) ──────────
 function buildTags(object $row): array {
@@ -84,7 +84,7 @@ $products = array_map(function (object $row) use ($catMeta, $defaultMeta): array
 
     // image path (adjust if needed)
     $image = !empty($row->image)
-        ? 'uploads/' . $row->image
+        ? 'uploads/livestock/' . $row->image
         : null;
 
     return [
@@ -246,8 +246,8 @@ $filterCats = array_unique(array_column($products, 'cat'));
 
 <script>
     window.isLoggedIn = <?php echo isset($_SESSION['user']) ? 'true' : 'false'; ?>;
-    function openImage(src) {
-        const win = window.open("");
-        win.document.write(`<img src="${src}" style="width:100%">`);
-    }
+function openImage(src) {
+    const win = window.open("");
+    win.document.write(`<img src="${src}" style="width:100%">`);
+}
 </script>

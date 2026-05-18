@@ -226,6 +226,191 @@ if(isset($_POST['key'])):
 
     endif;
 
+    if($key === "save_rider"):
+
+        $data = array(
+              "order_id" => $_POST["orderId"],
+              "description" => $_POST["desc"],
+              "delivery_fee" => $_POST["fee"],
+              "name" => $_POST["d_name"],
+              "vehicle_type" => $_POST["v_type"]
+        );
+
+        $obj->insertAny("delivery_details", $data, "Save Success");
+
+    endif;
+
+    if($key === "check_rider"):
+
+        $order_id = $_POST['orderID'] ?? null;
+
+        if(!$order_id){
+            echo json_encode([
+                'status' => false,
+                'message' => 'Order ID is required'
+            ]);
+            exit;
+        }
+
+        $stmt = $pdo->prepare("
+            SELECT 
+                id,
+                name,
+                description,
+                vehicle_type,
+                order_id,
+                delivery_fee
+            FROM delivery_details
+            WHERE order_id = ?
+        ");
+
+        $stmt->execute([$order_id]);
+
+        $result = $stmt->fetch(PDO::FETCH_ASSOC);
+
+        echo json_encode($result);
+
+    endif;
+
+    if($key === "update_rider"):
+
+        $stmt = $pdo->prepare("
+            UPDATE delivery_details 
+            SET 
+                name = ?, 
+                description = ?, 
+                vehicle_type = ?, 
+                delivery_fee = ?
+            WHERE id = ?
+        ");
+
+        $stmt->execute([
+            $_POST['d_name'],
+            $_POST['desc'],
+            $_POST['v_type'],
+            $_POST['fee'],
+            $_POST['drID']
+        ]);
+
+        echo "updated";
+
+    endif;
+
+    if($key === "save_payroll"):
+
+        $stmt = $pdo->prepare("
+            INSERT INTO payroll (
+                user_id,
+                period_start,
+                period_end,
+                daily_rate,
+                ot_pay,
+                sss,
+                pagibig,
+                philhealth,
+                late_deduction,
+                other_deduction,
+                net_pay,
+                status,
+                total_deduction,
+                basic_pay,
+                created_at
+            ) VALUES (
+                :user_id,
+                :period_start,
+                :period_end,
+                :daily_rate,
+                :ot_pay,
+                :sss,
+                :pagibig,
+                :philhealth,
+                :late_deduction,
+                :other_deduction,
+                :net_pay,
+                :status,
+                :total_deduction,
+                :basic_pay,
+                CURDATE()
+            )
+        ");
+
+        $stmt->execute([
+            ':user_id'         => (int)$_POST['user_id'],
+            ':period_start'    => $_POST['period_start'],
+            ':period_end'      => $_POST['period_end'],
+            ':daily_rate'      => (float)($_POST['daily_rate'] ?? 0),
+            ':ot_pay'          => (float)($_POST['ot_pay'] ?? 0),
+            ':sss'             => (float)($_POST['sss'] ?? 0),
+            ':pagibig'         => (float)($_POST['pagibig'] ?? 0),
+            ':philhealth'      => (float)($_POST['philhealth'] ?? 0),
+            ':late_deduction'  => (float)($_POST['late_deduction'] ?? 0),
+            ':other_deduction' => (float)($_POST['other_deduction'] ?? 0),
+            ':net_pay'         => (float)($_POST['net_pay'] ?? 0),
+            ':status'          => $_POST['status'] === 'paid' ? 1 : 0,
+            ':total_deduction' => (float)($_POST['total_deduction'] ?? 0),
+            ':basic_pay'       => (float)($_POST['basic_pay'] ?? 0),
+        ]);
+
+        $newId = $pdo->lastInsertId();
+
+        echo json_encode([
+            'success' => true,
+            'id'      => $newId,
+            'message' => 'Payslip saved successfully.'
+        ]);
+
+    endif;
+
+    if($key === "update_payroll"):
+
+        $stmt = $pdo->prepare("
+            UPDATE payroll SET
+                period_start    = :period_start,
+                period_end      = :period_end,
+                daily_rate      = :daily_rate,
+                basic_pay       = :basic_pay,
+                ot_pay          = :ot_pay,
+                sss             = :sss,
+                philhealth      = :philhealth,
+                pagibig         = :pagibig,
+                late_deduction  = :late_deduction,
+                other_deduction = :other_deduction,
+                total_deduction = :total_deduction,
+                net_pay         = :net_pay,
+                status          = :status
+            WHERE id = :id
+        ");
+
+        $stmt->execute([
+            ':period_start'    => $_POST['period_start'],
+            ':period_end'      => $_POST['period_end'],
+            ':daily_rate'      => (float)$_POST['daily_rate'],
+            ':basic_pay'       => (float)$_POST['basic_pay'],
+            ':ot_pay'          => (float)($_POST['ot_pay'] ?? 0),
+            ':sss'             => (float)($_POST['sss'] ?? 0),
+            ':philhealth'      => (float)($_POST['philhealth'] ?? 0),
+            ':pagibig'         => (float)($_POST['pagibig'] ?? 0),
+            ':late_deduction'  => (float)($_POST['late_deduction'] ?? 0),
+            ':other_deduction' => (float)($_POST['other_deduction'] ?? 0),
+            ':total_deduction' => (float)($_POST['total_deduction'] ?? 0),
+            ':net_pay'         => (float)$_POST['net_pay'],
+            ':status'          => $_POST['status'] === 'paid' ? 1 : 0,
+            ':id'              => (int)$_POST['id'],
+        ]);
+
+        echo json_encode(['success' => true]);
+
+    endif;
+
+    if($key === "delete_payroll"):
+
+        $stmt = $pdo->prepare("DELETE FROM payroll WHERE id = ?");
+        $stmt->execute([(int)$_POST['id']]);
+
+        echo json_encode(['success' => true]);
+
+    endif;
+
 endif;
  
 ?>

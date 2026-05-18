@@ -44,6 +44,14 @@ $isStaff = strtolower($role) === 'staff';
                     <span>Products</span>
                 </a>
             </li>
+
+            <li class="nav-item">
+                <a href="<?= BASE_URL ?>/index.php?page=delivery"
+                class="nav-link <?= $current === 'delivery' ? 'active' : '' ?>">
+                    <i class="bi bi-truck"></i>
+                    <span>Delivery</span>
+                </a>
+            </li>
             <?php endif; ?>
 
             <!-- ORDERS (ADMIN + STAFF) -->
@@ -57,6 +65,17 @@ $isStaff = strtolower($role) === 'staff';
             </li>
             <?php endif; ?>
 
+            <!-- ORDERS (ADMIN + STAFF) -->
+            <?php if ($isAdmin || $isStaff): ?>
+            <li class="nav-item">
+                <a href="<?= BASE_URL ?>/index.php?page=mypayslip"
+                class="nav-link <?= $current === 'orders' ? 'active' : '' ?>">
+                    <i class="bi bi-bag"></i>
+                    <span>Payslip</span>
+                </a>
+            </li>
+            <?php endif; ?>
+
             <!-- USERS (ADMIN ONLY) -->
             <?php if ($isAdmin): ?>
             <li class="nav-item">
@@ -64,6 +83,16 @@ $isStaff = strtolower($role) === 'staff';
                 class="nav-link <?= $current === 'users' ? 'active' : '' ?>">
                     <i class="bi bi-people-fill"></i>
                     <span>Users</span>
+                </a>
+            </li>
+            <?php endif; ?>
+
+            <?php if ($isAdmin): ?>
+            <li class="nav-item">
+                <a href="<?= BASE_URL ?>/index.php?page=payroll"
+                class="nav-link <?= $current === 'payroll' ? 'active' : '' ?>">
+                    <i class="bi bi-people-fill"></i>
+                    <span>Payroll</span>
                 </a>
             </li>
             <?php endif; ?>

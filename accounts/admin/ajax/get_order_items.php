@@ -8,7 +8,7 @@ try {
     $id = $_POST['id'];
 
     $stmt = $pdo->prepare("
-        SELECT 
+        SELECT DISTINCT
             o.id,
             o.order_status,
             o.total_amount,
@@ -18,16 +18,19 @@ try {
             u.email_address,
             u.contact_number,
             u.address,
-
             oi.quantity,
             oi.price,
-            oi.product_name as name
-
+            oi.product_name,
+            dd.*
         FROM orders o
-        JOIN user_profile u ON u.id = o.user_id
-        JOIN order_items oi ON oi.order_id = o.id
-
+        JOIN user_profile u 
+            ON u.id = o.user_id
+        JOIN order_items oi  
+            ON oi.order_id = o.id
+        LEFT JOIN delivery_details dd
+            ON dd.order_id = o.id
         WHERE o.id = ?
+        ORDER BY oi.product_name;
     ");
 
     $stmt->execute([$id]);
